@@ -28,7 +28,6 @@ void GameLogic::new_game(bool play_first) {
 
 byte GameLogic::do_move() {
   (this->*logic_node)();
-  //GameLogic::logic_node();
 }
 
 byte GameLogic::move_easy() {
@@ -56,17 +55,76 @@ byte GameLogic::move_medium() {
 }
 
 byte GameLogic::first_x_hard() {
-  byte posn;
-  Serial.println("First X");
-  logic_node = &GameLogic::move_easy;
-  return any_open();
+  logic_node = &GameLogic::second_x_hard;
+  return open_corner();
+}
+
+byte GameLogic::second_x_hard() {
+  logic_node = &GameLogic::play_out_hard;
+  byte trap;
+  if (open(4)) {
+    if ((trap = second_x_trap()) != NO_POSN) {  // a more fun way to win!
+      return trap;
+    } else {
+      return unblocked_corner();  // there should always be one at this point
+    }
+  } else {
+    return opposite_corner();  // there should always be one at this point
+  }
 }
 
 byte GameLogic::first_o_hard() {
+  if (theirs(4)) {
+    logic_node = &GameLogic::o_center_hard;
+    return open_corner();
+  } else if (theirs(0) || theirs(2) || theirs(6) || theirs(8)) {
+    logic_node = &GameLogic::o_corner_hard;
+    return 4;
+  } else {  // edge move, worst move for player
+    logic_node = &GameLogic::o_edge_hard;
+    return 4;
+  }
+}
+
+byte GameLogic::o_center_hard() {
+  logic_node = &GameLogic::play_out_hard;
+  byte block;
+  if ((block = win_possible(their_mark)) != NO_POSN) {
+    return block;
+  } else { return unblocked_corner(); }
+}
+
+byte GameLogic::o_corner_hard() {
+  logic_node = &GameLogic::play_out_hard;
+  byte block;
+  if ((block = win_possible(their_mark)) != NO_POSN) {
+    return block;
+  } else { return open_edge(); }
+}
+
+byte GameLogic::o_edge_hard() {
+  logic_node = &GameLogic::play_out_hard;
+  byte block;
+  if ((block = win_possible(their_mark)) != NO_POSN) {
+    return block;
+  } else if ((block = blocking_corner()) != NO_POSN) {
+    return block;
+  } else {
+    return open_corner();
+  }
+}
+
+byte GameLogic::play_out_hard() {
   byte posn;
-  Serial.println("First O");
-  logic_node = &GameLogic::move_easy;
-  return any_open();
+  if ((posn = win_possible(my_mark)) != NO_POSN) {
+    return posn;
+  } else if ((posn = win_possible(their_mark)) != NO_POSN) {
+    return posn;
+  } else if ((posn = unblocked_corner()) != NO_POSN) {
+    return posn;
+  } else {
+    return any_open();
+  }
 }
 
 bool GameLogic::open(byte posn) {
@@ -124,24 +182,70 @@ byte GameLogic::any_open() {
       move_options[count++] = i;
     }
   }
-  return move_options[0];
+  return move_options[rand() % count];
 }
 
 byte GameLogic::open_edge() {
   byte move_options[9];
   int count = 0;
-  if (open(1)) {
-    move_options[count++] = 1;
-  }
-  if (open(3)) {
-    move_options[count++] = 3;
-  }
-  if (open(5)) {
-    move_options[count++] = 5;
-  }
-  if (open(7)) {
-    move_options[count++] = 7;
-  }
-  return move_options[0];
+  if (open(1)) { move_options[count++] = 1; }
+  if (open(3)) { move_options[count++] = 3; }
+  if (open(5)) { move_options[count++] = 5; }
+  if (open(7)) { move_options[count++] = 7; }
+  if (count) {
+    return move_options[rand() % count];
+  } else { return NO_POSN; }
+}
+
+byte GameLogic::open_corner() {
+  byte move_options[4];
+  int count = 0;
+  if (open(0)) { move_options[count++] = 0; }
+  if (open(2)) { move_options[count++] = 2; }
+  if (open(6)) { move_options[count++] = 6; }
+  if (open(8)) { move_options[count++] = 8; }
+  if (count) {
+    return move_options[(rand() % count)];
+  } else { return NO_POSN; }
+}
+
+byte GameLogic::unblocked_corner() {
+  byte move_options[4];
+  int count = 0;
+  if (open(0) && ((mine(2) && open(1)) || (mine(6) && open(3)))) { move_options[count++] = 0; }
+  if (open(2) && ((mine(0) && open(1)) || (mine(8) && open(5)))) { move_options[count++] = 2; }
+  if (open(6) && ((mine(0) && open(3)) || (mine(8) && open(7)))) { move_options[count++] = 6; }
+  if (open(8) && ((mine(2) && open(5)) || (mine(6) && open(7)))) { move_options[count++] = 8; }
+  if (count) {
+    return move_options[rand() % count];
+  } else { return NO_POSN; }
+}
+
+byte GameLogic::opposite_corner() {
+  if (open(0) && mine(8)) { return 0; }
+  else if (open(2) && mine(6)) { return 2; }
+  else if (open(6) && mine(2)) { return 6; }
+  else if (open(8) && mine(0)) { return 8; }
+  else { return NO_POSN; }
+}
+
+byte GameLogic::blocking_corner() {
+  byte move_options[4];
+  int count = 0;
+  if (open(0) && theirs(1) && theirs(3)) { move_options[count++] = 0; }
+  if (open(2) && theirs(1) && theirs(5)) { move_options[count++] = 2; }
+  if (open(6) && theirs(3) && theirs(7)) { move_options[count++] = 6; }
+  if (open(8) && theirs(5) && theirs(7)) { move_options[count++] = 8; }
+  if (count) {
+    return move_options[rand() % count];
+  } else { return NO_POSN; }
+}
+
+byte GameLogic::second_x_trap() {
+  if ((mine(6) && theirs(5)) || (mine(2) && theirs(7))) { return 0; }
+  else if ((mine(8) && theirs(3)) || (mine(0) && theirs(7))) { return 2; }
+  else if ((mine(8) && theirs(1)) || (mine(0) && theirs(5))) { return 6; }
+  else if ((mine(2) && theirs(3)) || (mine(6) && theirs(1))) { return 8; }
+  else { return NO_POSN; }
 }
 

@@ -142,7 +142,6 @@ void change_state(byte new_state) {
       Serial.println("Waiting for player move (or 1..8)");
       break;
     case UARM_TURN :
-      Serial.println("Waiting for uArm move (or 1..8)");
       break;
     case POSTGAME :
       {

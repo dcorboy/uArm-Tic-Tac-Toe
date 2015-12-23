@@ -23,7 +23,12 @@ class GameLogic {
     byte move_easy();
     byte move_medium();
     byte first_x_hard();
+    byte second_x_hard();
     byte first_o_hard();
+    byte o_center_hard();
+    byte o_corner_hard();
+    byte o_edge_hard();
+    byte play_out_hard();
 
     // test functions
     bool open(byte posn);
@@ -36,4 +41,9 @@ class GameLogic {
     // move selections
     byte any_open();
     byte open_edge();
+    byte open_corner();
+    byte unblocked_corner();
+    byte opposite_corner();
+    byte blocking_corner();
+    byte second_x_trap();
 };
