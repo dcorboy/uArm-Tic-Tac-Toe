@@ -1,4 +1,3 @@
-#include <arduino.h>
 #include "sensor.h"
 
 Sensor::Sensor() {
@@ -17,6 +16,7 @@ bool Sensor::board_ready() {
 }
 
 byte Sensor::detect_start() {
+  int object = pixy.getBlocks();
   return NO_VAL;
 }
 

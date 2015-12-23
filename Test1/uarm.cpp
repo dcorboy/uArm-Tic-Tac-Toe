@@ -1,5 +1,3 @@
-#include <arduino.h>
-//#include "uArm_library.h"
 #include "uarm.h"
 
 uArm_Controller::uArm_Controller() {
@@ -10,13 +8,17 @@ void uArm_Controller::new_game(bool play_first) {
   their_mark = play_first ? 2 : 1;
 }
 
+void uArm_Controller::wait_ready() {}
+
+void uArm_Controller::wait_start() {}
+
 void uArm_Controller::make_move(byte posn) {
   pickup_unplayed_marker();
   place_held_marker(posn);
 }
 
 void uArm_Controller::pickup_unplayed_marker() {
-  // uarm.moveTo(13, -13, 3);
+  uarm.moveTo(13, -13, 3);
   delay(1000);
 }
 
@@ -24,6 +26,8 @@ void uArm_Controller::place_held_marker(byte posn) {
   // uarm.moveTo(-13, 13, 3);
   delay(1000);
 }
+
+void uArm_Controller::postgame(byte winner) {}
 
 //    if (readSerial == 't')
 //    {

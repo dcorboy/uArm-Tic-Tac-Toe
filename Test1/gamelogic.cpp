@@ -1,5 +1,3 @@
-#include <arduino.h>
-#include "gameboard.h"
 #include "gamelogic.h"
 
 GameLogic::GameLogic(GameBoard* the_board) {

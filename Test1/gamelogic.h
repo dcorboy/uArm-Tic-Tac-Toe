@@ -1,3 +1,6 @@
+#include <arduino.h>
+#include "gameboard.h"
+
 #define NO_POSN 255
 
 #define MODE_EASY   0
@@ -16,10 +19,9 @@ class GameLogic {
     byte (GameLogic::*logic_node)();
     byte my_mark;
     byte their_mark;
-    byte mode;
-    byte defense_pattern;
+    byte mode;  // MODE_HARD, MODE_MEDIUM or MODE_EASY
 
-    // move logics
+    // move logic nodes
     byte move_easy();
     byte move_medium();
     byte first_x_hard();
@@ -30,7 +32,7 @@ class GameLogic {
     byte o_edge_hard();
     byte play_out_hard();
 
-    // test functions
+    // board-state test functions
     bool open(byte posn);
     bool mine(byte posn);
     bool theirs(byte posn);
@@ -38,7 +40,7 @@ class GameLogic {
     byte win_possible(byte player);
     byte win_path(byte player, const byte path[3]);
 
-    // move selections
+    // move options
     byte any_open();
     byte open_edge();
     byte open_corner();

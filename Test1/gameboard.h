@@ -1,3 +1,8 @@
+#include <arduino.h>
+
+#ifndef GameBoard_h
+#define GameBoard_h
+
 class GameBoard {
   public:
     GameBoard();
@@ -24,4 +29,6 @@ class GameBoard {
     byte board[9];
     byte turn;
 };
+
+#endif
 

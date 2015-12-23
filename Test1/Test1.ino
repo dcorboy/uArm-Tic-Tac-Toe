@@ -43,7 +43,7 @@
 GameBoard board;
 GameLogic logic(&board);
 Sensor sensor;
-uArm_Controller uarm;
+uArm_Controller uarm_ctrl;
 
 byte state;
 byte player_mark;
@@ -109,7 +109,7 @@ void loop() {
       board.set_posn(move);
       Serial.print(F("UArm moves to: "));
       Serial.println(move + 1);
-      uarm.make_move(move);
+      uarm_ctrl.make_move(move);
       change_state(board.game_over() ? POSTGAME : PLAYER_TURN);
       break;
     case POSTGAME :
@@ -122,7 +122,7 @@ void loop() {
 
 void start_game(bool player_first) {
   logic.new_game(!player_first);
-  uarm.new_game(!player_first);
+  uarm_ctrl.new_game(!player_first);
   player_mark = player_first ? 1 : 2;
   Serial.println(F("The game has begun"));
   change_state(player_first ? PLAYER_TURN : UARM_TURN);
@@ -134,9 +134,11 @@ void change_state(byte new_state) {
       board.reset();
       sensor.reset();
       Serial.println(F("Waiting for board to be (R)eady..."));
+      uarm_ctrl.wait_ready();
       break;
     case WAIT_START :
       Serial.println(F("Waiting for you to go (F)irst, unless you want to go (S)econd"));
+      uarm_ctrl.wait_start();
       break;
     case PLAYER_TURN :
       Serial.println(F("Waiting for player move (or 1..8)"));
@@ -153,6 +155,7 @@ void change_state(byte new_state) {
         } else {
           Serial.println(F("The game is a draw..."));
         }
+        uarm_ctrl.postgame(winner);
         break;
       }
   }
