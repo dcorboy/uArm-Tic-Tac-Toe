@@ -90,13 +90,13 @@ void loop() {
             if (board.valid_move(num - 1)) {
               move = num - 1;
             } else {
-              Serial.println("Move is not valid");
+              Serial.println(F("Move is not valid"));
             }
           }
         }
         if (move != NO_VAL) {
           board.set_posn(move);
-          Serial.print("Player moves to: ");
+          Serial.print(F("Player moves to: "));
           Serial.println(move + 1);
           change_state(board.game_over() ? POSTGAME : UARM_TURN);
         } else if (input == 'q') {
@@ -107,7 +107,7 @@ void loop() {
     case UARM_TURN :
       move = logic.do_move();
       board.set_posn(move);
-      Serial.print("UArm moves to: ");
+      Serial.print(F("UArm moves to: "));
       Serial.println(move + 1);
       uarm.make_move(move);
       change_state(board.game_over() ? POSTGAME : PLAYER_TURN);
@@ -133,25 +133,25 @@ void change_state(byte new_state) {
     case WAIT_READY :
       board.reset();
       sensor.reset();
-      Serial.println("Waiting for board to be (R)eady...");
+      Serial.println(F("Waiting for board to be (R)eady..."));
       break;
     case WAIT_START :
-      Serial.println("Waiting for you to go (F)irst, unless you want to go (S)econd");
+      Serial.println(F("Waiting for you to go (F)irst, unless you want to go (S)econd"));
       break;
     case PLAYER_TURN :
-      Serial.println("Waiting for player move (or 1..8)");
+      Serial.println(F("Waiting for player move (or 1..8)"));
       break;
     case UARM_TURN :
       break;
     case POSTGAME :
       {
         byte winner = board.winner();
-        Serial.println("The game is over  (S)kip");
+        Serial.println(F("The game is over  (S)kip"));
         if (winner != 0) {
-          Serial.print(winner == player_mark ? "Player" : "uArm");
-          Serial.println(" is the winner!");
+          Serial.print(winner == player_mark ? F("Player") : F("uArm"));
+          Serial.println(F(" is the winner!"));
         } else {
-          Serial.println("The game is a draw...");
+          Serial.println(F("The game is a draw..."));
         }
         break;
       }
