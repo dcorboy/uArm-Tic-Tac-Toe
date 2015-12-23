@@ -84,11 +84,17 @@ void loop() {
     case PLAYER_TURN :
       {
         move = sensor.detect_player_move();
-        if (move != NO_VAL || input != NO_VAL) {
+        if (input != NO_VAL) {
           byte num = input - '0';
           if (num >= 1 && num <= 8) {
-            move = num - 1;
+            if (board.valid_move(num - 1)) {
+              move = num - 1;
+            } else {
+              Serial.println("Move is not valid");
+            }
           }
+        }
+        if (move != NO_VAL) {
           board.set_posn(move);
           Serial.print("Player moves to: ");
           Serial.println(move + 1);
@@ -107,7 +113,7 @@ void loop() {
       change_state(board.game_over() ? POSTGAME : PLAYER_TURN);
       break;
     case POSTGAME :
-      if (Serial.available() > 0 && Serial.read() == 's') {
+      if (input == 's') {
         change_state(WAIT_READY);
       }
       break;
@@ -139,10 +145,17 @@ void change_state(byte new_state) {
       Serial.println("Waiting for uArm move (or 1..8)");
       break;
     case POSTGAME :
-      Serial.println("The game is over  (S)kip");
-      Serial.print(board.winner() == player_mark ? "Player" : "uArm"); 
-      Serial.println(" is the winner!");
-      break;
+      {
+        byte winner = board.winner();
+        Serial.println("The game is over  (S)kip");
+        if (winner != 0) {
+          Serial.print(winner == player_mark ? "Player" : "uArm");
+          Serial.println(" is the winner!");
+        } else {
+          Serial.println("The game is a draw...");
+        }
+        break;
+      }
   }
   state = new_state;
 }

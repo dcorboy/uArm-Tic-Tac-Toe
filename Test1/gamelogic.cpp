@@ -13,17 +13,22 @@ void GameLogic::test() {
 void GameLogic::new_game(bool play_first) {
   my_mark = play_first ? 1 : 2;
   their_mark = play_first ? 2 : 1;
-  mode = MODE_EASY;
+  mode = MODE_HARD;
+
+  if (mode == MODE_EASY) {
+    logic_node = &GameLogic::move_easy;
+  } else if (mode == MODE_MEDIUM) {
+    logic_node = &GameLogic::move_medium;
+  } else if (play_first) {
+    logic_node = &GameLogic::first_x_hard;
+  } else {
+    logic_node = &GameLogic::first_o_hard;
+  }
 }
 
 byte GameLogic::do_move() {
-  if (mode == MODE_EASY) {
-    return move_easy();
-  } else if (mode == MODE_MEDIUM) {
-    return move_medium();
-  } else {
-    return move_hard();
-  }
+  (this->*logic_node)();
+  //GameLogic::logic_node();
 }
 
 byte GameLogic::move_easy() {
@@ -50,15 +55,18 @@ byte GameLogic::move_medium() {
   }
 }
 
-byte GameLogic::move_hard() {
+byte GameLogic::first_x_hard() {
   byte posn;
-  if ((posn = win_possible(my_mark)) != NO_POSN) {
-    return posn;
-  } else if ((posn = win_possible(their_mark)) != NO_POSN) {
-    return posn;
-  } else {
-    return any_open();
-  }
+  Serial.println("First X");
+  logic_node = &GameLogic::move_easy;
+  return any_open();
+}
+
+byte GameLogic::first_o_hard() {
+  byte posn;
+  Serial.println("First O");
+  logic_node = &GameLogic::move_easy;
+  return any_open();
 }
 
 bool GameLogic::open(byte posn) {
@@ -122,10 +130,18 @@ byte GameLogic::any_open() {
 byte GameLogic::open_edge() {
   byte move_options[9];
   int count = 0;
-  if (open(1)) { move_options[count++] = 1; }
-  if (open(3)) { move_options[count++] = 3; }
-  if (open(5)) { move_options[count++] = 5; }
-  if (open(7)) { move_options[count++] = 7; }
+  if (open(1)) {
+    move_options[count++] = 1;
+  }
+  if (open(3)) {
+    move_options[count++] = 3;
+  }
+  if (open(5)) {
+    move_options[count++] = 5;
+  }
+  if (open(7)) {
+    move_options[count++] = 7;
+  }
   return move_options[0];
 }
 

@@ -13,6 +13,7 @@ class GameLogic {
 
   private:
     GameBoard* board;
+    byte (GameLogic::*logic_node)();
     byte my_mark;
     byte their_mark;
     byte mode;
@@ -21,7 +22,8 @@ class GameLogic {
     // move logics
     byte move_easy();
     byte move_medium();
-    byte move_hard();
+    byte first_x_hard();
+    byte first_o_hard();
 
     // test functions
     bool open(byte posn);
