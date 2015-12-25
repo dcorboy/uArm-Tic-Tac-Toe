@@ -14,7 +14,7 @@ class GameBoard {
     byte winner();
     byte get_turn();
     void reset();
-    byte paths[8][3] = {
+    const byte paths[8][3] = {
       {0, 1, 2},
       {3, 4, 5},
       {6, 7, 8},

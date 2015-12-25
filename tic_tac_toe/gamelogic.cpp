@@ -8,7 +8,7 @@ void GameLogic::test() {
   board->set_posn(4);
 }
 
-void GameLogic::new_game(bool play_first) {
+void GameLogic::new_game(bool play_first, byte difficulty) {
   my_mark = play_first ? 1 : 2;
   their_mark = play_first ? 2 : 1;
   mode = MODE_HARD;

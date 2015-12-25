@@ -1,26 +1,12 @@
 /******************************************************************************************
-  File Name          : Test.ino
-  Author             : Joey Song
+  File Name          : tic_tac_toe.ino
+  Author             : Dave Corboy
   Version            : V1.0
-  Date               : 26 Aug, 2014
-  Modified Date      : 19 Nov, 2015
-  Description        : This documents is for quick start with uArm Metal version
-  Copyright(C) 2015 uArm Team. All right reserved.
+  Date               : 22 Dec, 2015
+  Modified Date      : 25 Dec, 2015
+  Description        : uArm Metal Tic-Tac-Toe player
+  Copyright(C) 2015 Dave Corboy. All right reserved.
 *******************************************************************************************/
-
-/*
-   Table of Content
-
-   Function 1 - 4 :    move to a certain point (f)
-   Fucntion 5 - 6 :    move a Rectangle or a curve (function 5-6)
-   Function 7 - 8 :    attach or detach all servos (function 7-8)
-   Function 9     :    uArm calibration
-   Function 10    :    read current coordinate x,y,z
-   Function 11    :    recording mode
-
-*/
-
-// headers should must include these four headers
 
 #include <EEPROM.h>
 #include <Wire.h>
@@ -29,9 +15,6 @@
 #include "gamelogic.h"
 #include "sensor.h"
 #include "uarm.h"
-
-// define a uArm
-//uArmLibrary uArm;
 
 #define led 13  // built-in LED
 #define WAIT_READY    0   // the game control states
@@ -121,7 +104,7 @@ void loop() {
 }
 
 void start_game(bool player_first) {
-  logic.new_game(!player_first);
+  logic.new_game(!player_first, MODE_EASY);
   uarm_ctrl.new_game(!player_first);
   player_mark = player_first ? 1 : 2;
   Serial.println(F("The game has begun"));
@@ -141,6 +124,7 @@ void change_state(byte new_state) {
       uarm_ctrl.wait_start();
       break;
     case PLAYER_TURN :
+      uarm_ctrl.wait_player();
       Serial.println(F("Waiting for player move (or 1..8)"));
       break;
     case UARM_TURN :

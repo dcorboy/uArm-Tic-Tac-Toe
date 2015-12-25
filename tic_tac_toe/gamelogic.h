@@ -10,7 +10,7 @@
 class GameLogic {
   public:
     GameLogic(GameBoard* the_board);
-    void new_game(bool play_first);
+    void new_game(bool play_first, byte difficulty);
     byte do_move();
     void test();
 
