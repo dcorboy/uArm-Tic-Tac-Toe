@@ -22,6 +22,7 @@
 #define PLAYER_TURN   2
 #define UARM_TURN     3
 #define POSTGAME      4
+#define DEBUG         5
 
 GameBoard board;
 GameLogic logic(&board);
@@ -35,6 +36,8 @@ void setup() {
   pinMode(led, OUTPUT);
   Wire.begin();        // join i2c bus (address optional for master)
   Serial.begin(9600);  // start serial port at 9600 bps
+  sensor.begin();
+  uArm_Controller.begin();
   change_state(WAIT_READY);
 }
 
@@ -49,6 +52,8 @@ void loop() {
     case WAIT_READY :
       if (sensor.board_ready() || input == 'r') {
         change_state(WAIT_START);
+      } else if (input == 'd') {
+        change_state(DEBUG);
       }
       break;
     case WAIT_START :
@@ -69,7 +74,7 @@ void loop() {
         move = sensor.detect_player_move();
         if (input != NO_VAL) {
           byte num = input - '0';
-          if (num >= 1 && num <= 8) {
+          if (num >= 1 && num <= 9) {
             if (board.valid_move(num - 1)) {
               move = num - 1;
             } else {
@@ -100,10 +105,30 @@ void loop() {
         change_state(WAIT_READY);
       }
       break;
+    case DEBUG :
+      if (input == 'q') {
+        change_state(WAIT_READY);
+      } else if (input == 'x') {
+        uarm_ctrl.show_board_position(X_MARKER_POS);
+      } else if (input == 'o') {
+        uarm_ctrl.show_board_position(O_MARKER_POS);
+      } else if (input == 'w') {
+        uarm_ctrl.show_board_position(O_MARKER_POS);
+      } else if (input == 'd') {
+        //byte board[9];
+        //sensor.decode_board(board);
+      } else if (input != NO_VAL) {
+        byte num = input - '0';
+        if (num >= 1 && num <= 9) {
+          uarm_ctrl.show_board_position(num - 1);
+        }
+      }
+      break;
   }
 }
 
 void start_game(bool player_first) {
+  Serial.println(F("The game has almost begun"));
   logic.new_game(!player_first, MODE_EASY);
   uarm_ctrl.new_game(!player_first);
   player_mark = player_first ? 1 : 2;
@@ -116,7 +141,7 @@ void change_state(byte new_state) {
     case WAIT_READY :
       board.reset();
       sensor.reset();
-      Serial.println(F("Waiting for board to be (R)eady..."));
+      Serial.println(F("Waiting for board to be (R)eady... (or (D)ebug)"));
       uarm_ctrl.wait_ready();
       break;
     case WAIT_START :
@@ -142,6 +167,9 @@ void change_state(byte new_state) {
         uarm_ctrl.postgame(winner);
         break;
       }
+    case DEBUG :
+      Serial.println(F("(R)eset, (D)ecode board, Board Positions (1-9), (X)-Markers, (O)-Markers, (W)ait position or (Q)uit"));
+      break;
   }
   state = new_state;
 }
