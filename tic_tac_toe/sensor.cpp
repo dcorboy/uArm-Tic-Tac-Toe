@@ -46,7 +46,7 @@ byte *Sensor::valid_board(byte board[]) {
         return board;
       }
     } else {
-      memcpy(board, cached_board, 9);
+      memcpy(cached_board, board, 9);
       stable_hold = STABLE_HOLD;
     }
   }
@@ -90,9 +90,9 @@ byte *Sensor::decode_board(byte board[], uint16_t object_cnt) {
         pos += 1;
       }
       board[pos] = (byte)pixy.blocks[j].signature;
-      sprintf(buf, "  %c mark in position %d: ", pixy.blocks[j].signature == 1 ? 'X' : 'O', pos);
-      Serial.print(buf);
-      pixy.blocks[j].print();
+//      sprintf(buf, "  %c mark in position %d: ", pixy.blocks[j].signature == 1 ? 'X' : 'O', pos);
+//      Serial.print(buf);
+//      pixy.blocks[j].print();
     }
   } else {
     Serial.println("No objects");
@@ -108,6 +108,21 @@ bool Sensor::boards_equal(byte board_a[], byte board_b[]) {
   }
   return true;
 }
+
+
+
+
+//byte Sensor::detect_start() {
+//  byte board[9];
+//  uint16_t object_cnt = pixy.getBlocks();
+//  if (object_cnt) {
+//    frame_hold++;
+//    if (frame_hold % 64 == 0) {
+//      decode_board(board, object_cnt);
+//    }
+//  }
+//  return NO_VAL;
+//}
 
 // {
 //    sprintf(buf, "Detected %d:\n", object_cnt);

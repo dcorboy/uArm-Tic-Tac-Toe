@@ -23,7 +23,8 @@
 #define UARM_TURN     3
 #define POSTGAME      4
 #define DECODE_BOARD  5
-#define DEBUG         6
+#define STABLE_BOARD  6
+#define DEBUG         7
 
 GameBoard board;
 GameLogic logic(&board);
@@ -117,6 +118,8 @@ void loop() {
         uarm_ctrl.show_board_position(O_MARKER_POS);
       } else if (input == 'd') {
         change_state(DECODE_BOARD);
+      } else if (input == 's') {
+        change_state(STABLE_BOARD);
       } else if (input != NO_VAL) {
         byte num = input - '0';
         if (num >= 1 && num <= 9) {
@@ -128,6 +131,15 @@ void loop() {
       {
         byte board[9];
         if (sensor.check_board(board)) {
+          print_board(board);
+          change_state(DEBUG);
+        }
+      }
+      break;
+    case STABLE_BOARD :
+      {
+        byte board[9];
+        if (sensor.valid_board(board)) {
           print_board(board);
           change_state(DEBUG);
         }
@@ -177,7 +189,8 @@ void change_state(byte new_state) {
         break;
       }
     case DEBUG :
-      Serial.println(F("(R)eset, (D)ecode board, Board Positions (1-9), (X)-Markers, (O)-Markers, (W)ait position or (Q)uit"));
+      Serial.println(F("(R)eset, (D)ecode board, (S)table board, Board Positions (1-9)"));
+      Serial.println(F("(X)-Markers, (O)-Markers, (W)ait position or (Q)uit"));
       break;
   }
   state = new_state;
