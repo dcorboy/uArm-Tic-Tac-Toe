@@ -41,7 +41,8 @@ byte Sensor::detect_player_move() {
 byte *Sensor::valid_board(byte board[]) {
   if (check_board(board)) {
     if (boards_equal(board, cached_board)) {
-      if (stable_hold++ > STABLE_HOLD) {
+      Serial.println(stable_hold);
+      if (++stable_hold > STABLE_HOLD) {
         stable_hold = 0;
         return board;
       }
@@ -58,18 +59,18 @@ byte *Sensor::check_board(byte board[]) {
   uint16_t object_cnt = pixy.getBlocks();
   if (object_cnt > 0) {
     frame_hold++;
-    blank_hold = 0;
+    //blank_hold = 0;
     if (frame_hold % 64 == 0) {
       decode_board(board, object_cnt);
       return board;
     }
-  } else {
-    delay(20);
-    if (blank_hold++ > BLANK_HOLD) {
-      decode_board(board, object_cnt);
-      blank_hold = 0;
-      return board;
-    }
+//  } else {
+//    //delay(20);
+//    if (blank_hold++ == BLANK_HOLD) {
+//      decode_board(board, object_cnt);
+//      blank_hold = 0;
+//      return board;
+//    } else {Serial.println(blank_hold);}
   }
   return NULL;
 }
@@ -109,12 +110,25 @@ byte *Sensor::decode_board(byte board[], uint16_t object_cnt) {
 }
 
 bool Sensor::boards_equal(byte board_a[], byte board_b[]) {
+  Serial.print(board_count(board_a));
+  Serial.print(" vs. ");
+  Serial.println(board_count(board_b));
   for (int i = 0; i < 9; i++) {
     if (board_a[i] != board_b[i]) {
       return false;
     }
   }
   return true;
+}
+
+byte Sensor::board_count(byte board[]) {
+  byte count = 0;
+  for (int i = 0; i < 9; i++) {
+    if (board[i] != 0) {
+      count++;
+    }
+  }
+  return count;
 }
 
 
