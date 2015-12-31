@@ -22,7 +22,8 @@
 #define PLAYER_TURN   2
 #define UARM_TURN     3
 #define POSTGAME      4
-#define DEBUG         5
+#define DECODE_BOARD  5
+#define DEBUG         6
 
 GameBoard board;
 GameLogic logic(&board);
@@ -37,7 +38,7 @@ void setup() {
   Wire.begin();        // join i2c bus (address optional for master)
   Serial.begin(9600);  // start serial port at 9600 bps
   sensor.begin();
-  uArm_Controller.begin();
+  uarm_ctrl.begin();
   change_state(WAIT_READY);
 }
 
@@ -115,12 +116,20 @@ void loop() {
       } else if (input == 'w') {
         uarm_ctrl.show_board_position(O_MARKER_POS);
       } else if (input == 'd') {
-        //byte board[9];
-        //sensor.decode_board(board);
+        change_state(DECODE_BOARD);
       } else if (input != NO_VAL) {
         byte num = input - '0';
         if (num >= 1 && num <= 9) {
           uarm_ctrl.show_board_position(num - 1);
+        }
+      }
+      break;
+    case DECODE_BOARD :
+      {
+        byte board[9];
+        if (sensor.check_board(board)) {
+          print_board(board);
+          change_state(DEBUG);
         }
       }
       break;
@@ -174,6 +183,34 @@ void change_state(byte new_state) {
   state = new_state;
 }
 
+void print_board(byte board[]) {
+  char buf[32];
+  sprintf(buf, "  %c | %c | %c\n", get_mark(board[0]), get_mark(board[1]), get_mark(board[2]));
+  Serial.print(buf);
+  Serial.println(" -----------");
+  sprintf(buf, "  %c | %c | %c\n", get_mark(board[3]), get_mark(board[4]), get_mark(board[5]));
+  Serial.print(buf);
+  Serial.println(" -----------");
+  sprintf(buf, "  %c | %c | %c\n", get_mark(board[6]), get_mark(board[7]), get_mark(board[8]));
+  Serial.print(buf);
+}
+
+char get_mark(byte val) {
+  switch (val) {
+    case 0 :
+      return ' ';
+      break;
+    case 1 :
+      return 'X';
+      break;
+    case 2 :
+      return 'O';
+      break;
+    default :
+      return '?';
+      break;
+  }
+}
 
 //    if (readSerial == 'h') // Single Quote! This is a character.
 //    {
