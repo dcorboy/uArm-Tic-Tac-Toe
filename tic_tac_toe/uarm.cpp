@@ -1,10 +1,31 @@
 #include "uarm.h"
 
+#ifdef NO_UARM
+class uArmClass {
+  public:
+    uArmClass();
+
+    void moveTo(double x, double y, double z, int relative, double time);
+    void moveTo(double x, double y, double z, int relative, double time_spend, int servo_4_relative, double servo_4_angle);
+};
+
+uArmClass::uArmClass() {}
+void uArmClass::moveTo(double x, double y, double z, int relative, double time) {
+  Serial.println("youttried!!");
+}
+void uArmClass::moveTo(double x, double y, double z, int relative, double time_spend, int servo_4_relative, double servo_4_angle) {
+  Serial.println("youttried!!");
+}
+uArmClass uarm;
+#endif
+
 uArm_Controller::uArm_Controller() {
 }
 
 void uArm_Controller::begin() {
   pinMode(STOPPER, INPUT);
+  //digitalWrite(STOPPER, HIGH);  // in case of old Arduino
+  //wait wait, should this be INPUT_PULLUP?
 }
 
 void uArm_Controller::wait_ready() {
@@ -31,22 +52,24 @@ void uArm_Controller::new_game(bool play_first) {
 }
 
 void uArm_Controller::make_move(byte posn) {
-//  for (int i = 0; i < 9; i++) {
-//    Serial.print(F("Board positions: "));
-//    Serial.print(i);
-//    Serial.print(F(" -- X: "));
-//    Serial.print(board_positions[i][0]);
-//    Serial.print(", Y: ");
-//    Serial.println(board_positions[i][1]);
-//  }
+  //  for (int i = 0; i < 9; i++) {
+  //    Serial.print(F("Board positions: "));
+  //    Serial.print(i);
+  //    Serial.print(F(" -- X: "));
+  //    Serial.print(board_positions[i][0]);
+  //    Serial.print(", Y: ");
+  //    Serial.println(board_positions[i][1]);
+  //  }
+  #if 0
   Serial.print(F("Move to position: "));
   Serial.print(posn);
   Serial.print(F(" -- X: "));
   Serial.print(board_positions[posn][0]);
-  Serial.print(", Y: ");
+  Serial.print(F(", Y: "));
   Serial.print(board_positions[posn][1]);
-  Serial.print(", Z: ");
+  Serial.print(F(", Z: "));
   Serial.println(BOARD_HGT);
+  #endif
   move_marker(my_mark == 1 ? X_MARKER_X : O_MARKER_X, MARKERS_Y, MARKER_HGT, board_positions[posn][0], board_positions[posn][1], BOARD_HGT, 0);
 }
 
@@ -57,8 +80,8 @@ void uArm_Controller::make_move(byte posn) {
 // WAIT_POS     = wait (observer) position
 void uArm_Controller::show_board_position(byte posn) {
   double x, y, z;
-  
-  if (posn >=0 && posn < 9) {
+
+  if (posn >= 0 && posn < 9) {
     x = board_positions[posn][0];
     y = board_positions[posn][1];
     z = BOARD_HGT;
@@ -75,17 +98,17 @@ void uArm_Controller::show_board_position(byte posn) {
   Serial.print(posn);
   Serial.print(F(" -- X: "));
   Serial.print(x);
-  Serial.print(", Y: ");
+  Serial.print(F(", Y: "));
   Serial.print(y);
-  Serial.print(", Z: ");
+  Serial.print(F(", Z: "));
   Serial.println(z);
-  //uarm.moveTo(x, y, z, 0, 3);
+  uarm.moveTo(x, y, z, 0, 3);
 }
 
 // private members
 
 void uArm_Controller::move_wait_position() {
-  //uarm.moveTo(WAIT_X, WAIT_Y, WAIT_Z, 0, 3);
+  uarm.moveTo(WAIT_X, WAIT_Y, WAIT_Z, 0, 3);
 }
 
 // this is the main move procedure to pickup a playing piece at one location and drop it at another
@@ -96,12 +119,11 @@ void uArm_Controller::move_marker(double init_x, double init_y, double init_z, d
   //uarm.moveTo(init_x, init_y, init_z, false, 4);              // move to the initial position
   //pickup_drop(true, init_x, init_y, init_z, 0);               // move end-effector downwards until stopper hits something, then pick it up
   //delay(1000);
-  //uarm.moveTo(0, 0, 10, true, 1.5);                           // lift the captured object up off the pile
+  //uarm.moveTo(0, 0, 3, true, 1.5);                           // lift the captured object up off the pile
   //uarm.moveTo(dest_x, dest_y, dest_z, false, 3);              // move to the destination position
   //pickup_drop(false, dest_x, dest_y, dest_z, drop_rotation);  // move end-effector downwards until stopper hits something, then drop it
-  delay(1000);
+  //delay(1000);
   //uarm.moveTo(0, 0, 6, true, 1.5, false, drop_rotation);      // move the end-effector upwards to clear the playing area
-  // uarm.moveTo(dest_x, dest_y, dest_z);                     // move to destination
 }
 
 

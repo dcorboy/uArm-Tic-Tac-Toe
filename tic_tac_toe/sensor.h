@@ -1,6 +1,11 @@
+//#define NO_PIXY
+
 #include <arduino.h>
-#include <SPI.h>  
-#include <Pixy.h>
+#include "gameboard.h"
+#include <SPI.h>
+#ifndef NO_PIXY
+  #include <Pixy.h>
+#endif
 
 #define NO_VAL 255
 
@@ -9,7 +14,7 @@
 
 class Sensor {
   public:
-    Sensor();
+    Sensor(GameBoard* the_board);
     void begin(); // call during main init()
     void reset();
     bool board_ready();
@@ -17,15 +22,16 @@ class Sensor {
     byte detect_player_move();
     byte *valid_board(byte board[]);
     byte *check_board(byte board[]);
-    byte *check_board2(byte board[]);
 
   private:
+    GameBoard* game_board;
     byte frame_hold = 0;
     // uint16_t blank_hold = 0;
     byte stable_hold = 0;
     byte cached_board[9];
-    byte turn;
+    byte player_mark;
     bool boards_equal(byte board_a[], byte board_b[]);
     byte *decode_board(byte board[], uint16_t object_cnt);
     byte board_count(byte board[]);
+    byte diff_game_board(byte board[]);
 };

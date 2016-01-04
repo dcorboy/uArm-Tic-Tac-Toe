@@ -1,14 +1,18 @@
+#define NO_UARM
+
 #include <arduino.h>
-//#include "uArm_library.h"
+#ifndef NO_UARM
+  #include "uArm_library.h"
+#endif
 
 #ifndef uArm_Controller_h
 #define uArm_Controller_h
 
 #define STOPPER 2    // LOW = Pressed
 
-#ifndef uArm_library_h
-#define PUMP_EN                 6   // HIGH = Pump ON
-#define VALVE_EN                5   // HIGH = Valve OPEN
+#ifdef NO_UARM
+  #define PUMP_EN                 6   // HIGH = Pump ON
+  #define VALVE_EN                5   // HIGH = Valve OPEN
 #endif
 
 #define NO_VAL 255

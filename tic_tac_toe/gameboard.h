@@ -14,7 +14,9 @@ class GameBoard {
     byte winner();
     byte get_turn();
     void reset();
-    const byte paths[8][3] = {
+    byte *get_board();
+
+    const byte paths[8][3] PROGMEM = {
       {0, 1, 2},
       {3, 4, 5},
       {6, 7, 8},

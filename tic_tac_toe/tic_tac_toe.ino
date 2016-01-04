@@ -28,7 +28,7 @@
 
 GameBoard board;
 GameLogic logic(&board);
-Sensor sensor;
+Sensor sensor(&board);
 uArm_Controller uarm_ctrl;
 
 byte state;
@@ -40,6 +40,7 @@ void setup() {
   Serial.begin(9600);  // start serial port at 9600 bps
   sensor.begin();
   uarm_ctrl.begin();
+  delay(500);
   change_state(WAIT_READY);
 }
 
@@ -67,6 +68,7 @@ void loop() {
           } else if (input == 's') {
             player_first = false;
           }
+          Serial.println(F("Starting game"));
           start_game(player_first);
         }
       }
@@ -149,7 +151,7 @@ void loop() {
 }
 
 void start_game(bool player_first) {
-  Serial.println(F("The game has almost begun"));
+  //Serial.println(F("The game has almost begun"));
   logic.new_game(!player_first, MODE_EASY);
   uarm_ctrl.new_game(!player_first);
   player_mark = player_first ? 1 : 2;
@@ -171,7 +173,8 @@ void change_state(byte new_state) {
       break;
     case PLAYER_TURN :
       uarm_ctrl.wait_player();
-      Serial.println(F("Waiting for player move (or 1..8)"));
+      Serial.println(F("Waiting for player move (or 1..9)"));
+      print_board(board.get_board());
       break;
     case UARM_TURN :
       break;

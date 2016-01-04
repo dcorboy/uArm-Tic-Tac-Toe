@@ -6,9 +6,13 @@ GameBoard::GameBoard() {
 
 void GameBoard::reset() {
   turn = 0;
-  for (int i = 0; i < 9; i++) {
+  for (byte i = 0; i < 9; i++) {
     board[i] = 0;
   }
+}
+
+byte *GameBoard::get_board() {
+  return board;
 }
 
 void GameBoard::set_posn(byte pos) {
@@ -29,7 +33,7 @@ bool GameBoard::valid_move(byte pos) {
 }
 
 bool GameBoard::full() {
-  for (int i = 0; i < 9; i++) {
+  for (byte i = 0; i < 9; i++) {
     if (board[i] == 0) {
       return false;
     }
@@ -42,8 +46,8 @@ bool GameBoard::game_over() {
 }
 
 byte GameBoard::winner() {
-  for (int p = 0; p < 8; p++) {
-    int winner = board[paths[p][0]];
+  for (byte p = 0; p < 8; p++) {
+    byte winner = board[paths[p][0]];
     if (winner != 0 && board[(int)paths[p][1]] == winner && board[(int)paths[p][2]] == winner) {
       return winner;
     }
