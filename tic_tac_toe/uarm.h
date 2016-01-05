@@ -1,8 +1,11 @@
-#define NO_UARM
+//#define NO_UARM
 
 #include <arduino.h>
 #ifndef NO_UARM
-  #include "uArm_library.h"
+  //#include "uArm_library.h"
+  //#include <linreg.h>
+//#include <uarm_calibration.h>
+  #include <uarm_library.h>
 #endif
 
 #ifndef uArm_Controller_h

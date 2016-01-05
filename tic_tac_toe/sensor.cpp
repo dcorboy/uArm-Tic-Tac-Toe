@@ -76,7 +76,7 @@ byte *Sensor::valid_board(byte board[]) {
   if (check_board(board)) {
     if (boards_equal(board, cached_board)) {
       //Serial.println(stable_hold);
-      if (++stable_hold > STABLE_HOLD) {
+      if (++stable_hold >= STABLE_HOLD) {
         stable_hold = 0;
         print_board(board);
         return board;

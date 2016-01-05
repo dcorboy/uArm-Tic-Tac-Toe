@@ -11,10 +11,8 @@ class uArmClass {
 
 uArmClass::uArmClass() {}
 void uArmClass::moveTo(double x, double y, double z, int relative, double time) {
-  Serial.println("youttried!!");
 }
 void uArmClass::moveTo(double x, double y, double z, int relative, double time_spend, int servo_4_relative, double servo_4_angle) {
-  Serial.println("youttried!!");
 }
 uArmClass uarm;
 #endif

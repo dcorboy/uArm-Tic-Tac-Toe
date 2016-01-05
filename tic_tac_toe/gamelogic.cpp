@@ -67,7 +67,7 @@ byte GameLogic::second_x_hard() {
       return unblocked_corner();  // there should always be one at this point
     }
   } else {
-    return opposite_corner();  // there should always be one at this point
+    return opposite_corner_x();  // there should always be one at this point
   }
 }
 
@@ -97,6 +97,8 @@ byte GameLogic::o_corner_hard() {
   byte block;
   if ((block = win_possible(their_mark)) != NO_POSN) {
     return block;
+  } else if (theirs(1) || theirs(3) || theirs(5) || theirs(7)) { // they took and edge, an odd move
+    return opposite_corner_o();
   } else { return open_edge(); }
 }
 
@@ -219,11 +221,19 @@ byte GameLogic::unblocked_corner() {
   } else { return NO_POSN; }
 }
 
-byte GameLogic::opposite_corner() {
+byte GameLogic::opposite_corner_x() {
   if (open(0) && mine(8)) { return 0; }
   else if (open(2) && mine(6)) { return 2; }
   else if (open(6) && mine(2)) { return 6; }
   else if (open(8) && mine(0)) { return 8; }
+  else { return NO_POSN; }
+}
+
+byte GameLogic::opposite_corner_o() {
+  if (theirs(0)) { return 8; }
+  else if (theirs(2)) { return 6; }
+  else if (theirs(6)) { return 2; }
+  else if (theirs(8)) { return 0; }
   else { return NO_POSN; }
 }
 

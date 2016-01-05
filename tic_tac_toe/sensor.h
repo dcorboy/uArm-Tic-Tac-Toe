@@ -1,4 +1,4 @@
-#define NO_PIXY
+//#define NO_PIXY
 
 #include <arduino.h>
 #include "gameboard.h"

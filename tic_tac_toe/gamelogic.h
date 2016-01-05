@@ -45,7 +45,8 @@ class GameLogic {
     byte open_edge();
     byte open_corner();
     byte unblocked_corner();
-    byte opposite_corner();
+    byte opposite_corner_x();
+    byte opposite_corner_o();
     byte blocking_corner();
     byte second_x_trap();
 };
