@@ -8,7 +8,7 @@
   Copyright(C) 2015 Dave Corboy. All right reserved.
 *******************************************************************************************/
 
-#include <EEPROM.h>
+//#include <EEPROM.h>
 #include <Wire.h>
 #include <Servo.h>
 #include "gameboard.h"

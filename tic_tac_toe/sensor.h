@@ -1,4 +1,4 @@
-//#define NO_PIXY
+#define NO_PIXY
 
 #include <arduino.h>
 #include "gameboard.h"
@@ -30,6 +30,7 @@ class Sensor {
     byte stable_hold = 0;
     byte cached_board[9];
     byte player_mark;
+
     bool boards_equal(byte board_a[], byte board_b[]);
     byte *decode_board(byte board[], uint16_t object_cnt);
     byte board_count(byte board[]);
