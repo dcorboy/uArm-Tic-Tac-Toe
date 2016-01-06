@@ -182,6 +182,7 @@ void change_state(byte new_state) {
       {
         byte winner = board.winner();
         Serial.println(F("The game is over  (S)kip"));
+        print_board(board.get_board());
         if (winner != 0) {
           Serial.print(winner == player_mark ? F("Player") : F("uArm"));
           Serial.println(F(" is the winner!"));

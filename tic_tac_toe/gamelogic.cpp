@@ -97,7 +97,7 @@ byte GameLogic::o_corner_hard() {
   byte block;
   if ((block = win_possible(their_mark)) != NO_POSN) {
     return block;
-  } else if (theirs(1) || theirs(3) || theirs(5) || theirs(7)) { // they took and edge, an odd move
+  } else if (theirs(1) || theirs(3) || theirs(5) || theirs(7)) { // they took an edge, block fork
     return opposite_corner_o();
   } else { return open_edge(); }
 }
@@ -109,6 +109,8 @@ byte GameLogic::o_edge_hard() {
     return block;
   } else if ((block = blocking_corner()) != NO_POSN) {
     return block;
+  } else if (theirs(0) || theirs(2) || theirs(6) || theirs(8)) { // they took an corner, block fork
+    return opposite_corner_o();
   } else {
     return open_corner();
   }
@@ -144,8 +146,10 @@ bool GameLogic::test(byte posn, byte player) {
 }
 
 byte GameLogic::win_possible(byte player) {
-  for (int p = 0; p < 8; p++) {
-    int win_posn = win_path(player, board->paths[p]);
+  byte path[3];
+  for (byte p = 0; p < 8; p++) {
+    board->get_path(p, path);
+    int win_posn = win_path(player, path);
     if (win_posn != NO_POSN) {
       return win_posn;
     }
