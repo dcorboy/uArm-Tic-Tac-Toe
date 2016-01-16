@@ -1,0 +1,100 @@
+
+l_address: 60
+servo 1
+lr.getA():-29.33
+lr.getB():0.36
+l_address: 66
+servo 2
+lr.getA():-27.19
+lr.getB():0.35
+l_address: 72
+servo 3
+lr.getA():-30.91
+lr.getB():0.36
+l_address: 78
+servo 4
+lr.getA():-40.35
+lr.getB():0.48
+Put uarm in calibrati
+
+2.35
+21.74
+.90
+
+
+(This happened with calibration B)
+0, -24, 10
+should be Rot 90, L 37 R 53
+
+interpolation generates large L values, causing constraints to create rapid strange moves.
+
+Move to position: 7 -- X: 0.00, Y: -24.00, Z: 10.00
+destruction averted!
+Was:  90, 157, 47, 0
+That's: 0.00, 0.60, 5.32
+Now:  90, 120, 47, 0
+That's: -0.00, -5.63, 12.37
+more destruction averted!
+Was:  90, 120, 47, 0
+Now:  90, 120, 30, 0
+That's: -0.00, -8.58, 16.07
+Curr: -0.13, -14.56, 18.52
+Rot: 89.50
+Left: 96.42
+Right: 27.70
+
+
+Calibration B:
+
+l_address: 60
+servo 1
+lr.getA():-29.32
+lr.getB():0.35
+l_address: 66
+servo 2
+lr.getA():-27.40
+lr.getB():0.34
+l_address: 72
+servo 3
+lr.getA():-30.55
+lr.getB():0.35
+l_address: 78
+servo 4
+lr.getA():-43.24
+lr.getB():0.50
+
+0.95
+21.78
+2.00
+B Tests
+https://s3.amazonaws.com/corboy-images/result2.png
+https://s3.amazonaws.com/corboy-images/result3.png
+https://s3.amazonaws.com/corboy-images/result4.png
+https://s3.amazonaws.com/corboy-images/result5.png
+https://s3.amazonaws.com/corboy-images/result6.png
+https://s3.amazonaws.com/corboy-images/result7.png
+https://s3.amazonaws.com/corboy-images/result8.png
+https://s3.amazonaws.com/corboy-images/result9.png
+
+
+Calibration C (after re-mounting servo)
+
+l_address: 60
+servo 1
+lr.getA():-31.11
+lr.getB():0.36
+l_address: 66
+servo 2
+lr.getA():-26.97
+lr.getB():0.34
+l_address: 72
+servo 3
+lr.getA():-31.66
+lr.getB():0.36
+l_address: 78
+servo 4
+lr.getA():-42.03
+lr.getB():0.49
+0.20
+-4.92
+1.95

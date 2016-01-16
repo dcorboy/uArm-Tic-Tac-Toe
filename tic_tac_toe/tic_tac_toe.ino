@@ -16,7 +16,6 @@
 #include "sensor.h"
 #include "uarm.h"
 
-#define led 13  // built-in LED
 #define WAIT_READY    0   // the game control states
 #define WAIT_START    1
 #define PLAYER_TURN   2
@@ -25,6 +24,7 @@
 #define DECODE_BOARD  5
 #define STABLE_BOARD  6
 #define DEBUG         7
+#define PICKUP_TESTS  8
 
 GameBoard board;
 GameLogic logic(&board);
@@ -35,7 +35,6 @@ byte state;
 byte player_mark;
 
 void setup() {
-  pinMode(led, OUTPUT);
   Wire.begin();        // join i2c bus (address optional for master)
   Serial.begin(9600);  // start serial port at 9600 bps
   sensor.begin();
@@ -117,11 +116,21 @@ void loop() {
       } else if (input == 'o') {
         uarm_ctrl.show_board_position(O_MARKER_POS);
       } else if (input == 'w') {
-        uarm_ctrl.show_board_position(O_MARKER_POS);
+        uarm_ctrl.show_board_position(WAIT_POS);
       } else if (input == 'd') {
         change_state(DECODE_BOARD);
       } else if (input == 's') {
         change_state(STABLE_BOARD);
+      } else if (input == 'c') {
+        uarm_ctrl.show_xyz();
+      } else if (input == 'p') {
+        change_state(PICKUP_TESTS);
+      } else if (input == 'l') {
+        if (digitalRead(STOPPER) == HIGH) {
+          Serial.println(F("HIGH"));
+        } else {
+          Serial.println(F("LOW"));
+        }
       } else if (input != NO_VAL) {
         byte num = input - '0';
         if (num >= 1 && num <= 9) {
@@ -145,6 +154,31 @@ void loop() {
           print_board(board);
           change_state(DEBUG);
         }
+      }
+      break;
+    case PICKUP_TESTS :
+      if (input == 'q') {
+        change_state(DEBUG);
+      } else if (input == 'l') {
+        if (digitalRead(STOPPER) == HIGH) {
+          Serial.println(F("HIGH"));
+        } else {
+          Serial.println(F("LOW"));
+        }
+      } else if (input == 'd') {
+        uarm_ctrl.down_to_touch();
+      } else if (input == 'u') {
+        uarm_ctrl.show_board_position(WAIT_POS);
+      } else if (input == 'a') {
+        uarm_ctrl.attach_release(true);
+      } else if (input == 'r') {
+        uarm_ctrl.attach_release(false);
+      } else if (input == 'm') {
+        uarm_ctrl.move_marker(-7, -17, 8, 7, -17, 8);
+      } else if (input == 'b') {
+        uarm_ctrl.make_move(5);
+        uarm_ctrl.make_move(6);
+        uarm_ctrl.make_move(8);
       }
       break;
   }
@@ -194,7 +228,12 @@ void change_state(byte new_state) {
       }
     case DEBUG :
       Serial.println(F("(R)eset, (D)ecode board, (S)table board, Board Positions (1-9)"));
-      Serial.println(F("(X)-Markers, (O)-Markers, (W)ait position or (Q)uit"));
+      Serial.println(F("(X)-Markers, (O)-Markers, (W)ait position, (C)urrent XYZ"));
+      Serial.println(F("(P)ickup tests or (Q)uit"));
+      break;
+    case PICKUP_TESTS :
+      Serial.println(F("(L)imit switch, (D)own to touch, (U)p to lift"));
+      Serial.println(F("(A)ttach, (R)elease, (M)ove 4-6 (B)ig Enchilada or (Q)uit"));
       break;
   }
   state = new_state;
