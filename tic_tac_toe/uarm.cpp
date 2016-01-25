@@ -32,6 +32,10 @@ void uArm_Controller::begin() {
   my_mark = 1;
 }
 
+void uArm_Controller::alert(byte beeps) {
+  uarm.alert(beeps, 75, 75);
+}
+
 void uArm_Controller::wait_ready() {
   // we may have just woken up, but in any case
   // it is now time to think about playing a game
@@ -158,7 +162,7 @@ void uArm_Controller::down_to_touch() {
   double current_x, current_y, current_z;
   uarm.getCalXYZ(current_x, current_y, current_z);
   int stopper = HIGH;  // assume that we're not touching anything
-  while (stopper && current_z > 4) {
+  while (stopper && current_z > 4.5) {
     stopper = digitalRead(STOPPER);  // low means we hit something
     Serial.print(current_z);
     Serial.println(stopper);
@@ -193,16 +197,18 @@ void uArm_Controller::attach_release(bool pickup) {
 void uArm_Controller::pickup_drop(bool pickup, double current_x, double current_y, double current_z, int tgt_rotation) {
   int stopper = HIGH;  // assume that we're not touching anything
   if (pickup) {
-    while (stopper && current_z > 3.5) {
+    while (stopper && current_z > 4.0) {
       stopper = digitalRead(STOPPER);  // low means we hit something
       if (stopper == HIGH) { // if we haven't yet, move downwards a bit at a time
         current_z = current_z - .5;  // move downwards (too slow will not depress the limit switch)
         uarm.moveToAtOnce(current_x, current_y, current_z, false, tgt_rotation);
         delay(100);
+      } else {
+          Serial.println("stopper hit!");
       }
     }
   } else {
-    uarm.moveTo(current_x, current_y, current_z - 2, false, .5, false, tgt_rotation);
+    uarm.moveTo(current_x, current_y, 7, false, .5, false, tgt_rotation);
   }
 
   // at this point, the stopper is depressed so we can pickup or release via the pump

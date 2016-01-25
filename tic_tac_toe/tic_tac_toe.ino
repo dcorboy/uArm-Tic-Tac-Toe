@@ -176,9 +176,12 @@ void loop() {
       } else if (input == 'm') {
         uarm_ctrl.move_marker(-7, -17, 8, 7, -17, 8);
       } else if (input == 'b') {
-        uarm_ctrl.make_move(5);
-        uarm_ctrl.make_move(6);
+        uarm_ctrl.alert(2);
+        uarm_ctrl.make_move(4);
         uarm_ctrl.make_move(8);
+        //uarm_ctrl.make_move(8);
+        uarm_ctrl.wait_ready();
+        uarm_ctrl.alert(2);
       }
       break;
   }
@@ -200,6 +203,7 @@ void change_state(byte new_state) {
       sensor.reset();
       Serial.println(F("Waiting for board to be (R)eady... (or (D)ebug)"));
       uarm_ctrl.wait_ready();
+      uarm_ctrl.alert(2);
       break;
     case WAIT_START :
       Serial.println(F("Waiting for you to go (F)irst, unless you want to go (S)econd"));

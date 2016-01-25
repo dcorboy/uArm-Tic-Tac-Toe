@@ -37,7 +37,7 @@
 #define O_MARKER_X   14
 
 #define BOARD_HGT    10 // 8
-#define MARKER_HGT   12
+#define MARKER_HGT   10
 
 #define WAIT_X       0
 #define WAIT_Y       -17
@@ -63,6 +63,7 @@ class uArm_Controller {
     void new_game(bool play_first);
     void make_move(byte posn);
     void postgame(byte winner);
+    void alert(byte beeps);
 
     // debugs
     void show_board_position(byte posn);
