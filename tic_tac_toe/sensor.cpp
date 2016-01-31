@@ -78,7 +78,6 @@ byte *Sensor::valid_board(byte board[]) {
       //Serial.println(stable_hold);
       if (++stable_hold >= STABLE_HOLD) {
         stable_hold = 0;
-        print_board(board);
         return board;
       }
     } else {
@@ -115,7 +114,6 @@ byte *Sensor::check_board(byte board[]) {
 // will probably be incorrect if some Pixy functions are called too quickly
 byte *Sensor::decode_board(byte board[], uint16_t object_cnt) {
   char buf[32];
-  byte pos;
 
   for (int x = 0; x < 9; x++) {
     board[x] = 0;
@@ -126,30 +124,7 @@ byte *Sensor::decode_board(byte board[], uint16_t object_cnt) {
       int xpos = pixy.blocks[j].x;
       int ypos = pixy.blocks[j].y;
       if (xpos > left && xpos < right && ypos > top && ypos < bottom) { // filter blocks outside the board
-        int width = right - left;
-        int height = bottom - top;
-        int vdiv_1 = left + (width / 3);
-        int vdiv_2 = vdiv_1 + (width / 3);
-        int hdiv_1 = top + (height / 3);
-        int hdiv_2 = hdiv_1 + (height / 3);
-
-        if (ypos < hdiv_1) {
-          pos = 0;
-        } else if (ypos < hdiv_2) {
-          pos = 3;
-        } else {
-          pos = 6;
-        }
-
-        if (xpos > vdiv_2) {
-          pos += 2;
-        } else if (xpos > vdiv_1) {
-          pos += 1;
-        }
-        board[pos] = (byte)pixy.blocks[j].signature;
-        // sprintf(buf, "  %c mark in position %d: ", pixy.blocks[j].signature == 1 ? 'X' : 'O', pos);
-        // Serial.print(buf);
-        // pixy.blocks[j].print();
+        decode_block(board, pixy.blocks[j]);
       } else {
         // Serial.print("Outside board: ");
         // pixy.blocks[j].print();
@@ -159,6 +134,98 @@ byte *Sensor::decode_board(byte board[], uint16_t object_cnt) {
     Serial.println(F("No objects"));
   }
   return board;
+}
+
+// always returns whatever board it sees, overwriting board parameter completely
+// will probably be incorrect if some Pixy functions are called too quickly
+byte *Sensor::decode_block(byte board[], Block block) {
+  byte results[9];
+  byte covers = pos_covered(block, results);
+  for (byte i = 0; i < covers; i++) {
+    board[results[i]] = block.signature;
+  }
+}
+
+// this could be improved by adding a margin so that a block must cover the center point PLUS some
+// this could sort out valid length or width seperately
+byte Sensor::pos_covered(Block block, byte results[9]) {
+
+  if (block.width < CALIB_MARKER_MIN_SIZE || block.height < CALIB_MARKER_MIN_SIZE) {  // filter small blocks
+    return 0;
+  }
+
+  byte count = 0;
+
+  int block_top = block.y - (block.height / 2);
+  int block_left = block.x - (block.width / 2);
+  int block_bottom = block.y + (block.height / 2);
+  int block_right = block.x + (block.width / 2);
+
+
+  char buf[64];
+  //sprintf(buf, "Block %2d:  top: %3d left: %3d bot: %3d rgt: %3d\n", block.signature, block_top, block_left, block_bottom, block_right);
+  //Serial.print(buf);
+
+  int vsixth = (right - left) / 6;
+  int hsixth = (bottom - top) / 6;
+
+  int p_left = left + hsixth;
+  int p_hmiddle = left + (3 * hsixth);
+  int p_right = left + (5 * hsixth);
+  int p_top = top + vsixth;
+  int p_vmiddle = top + (3 * vsixth);
+  int p_bottom = top + (5 * vsixth);
+
+  if (!shown) {
+    //sprintf(buf, "left %3d: middle: %3d right: %3d\n", p_left, p_hmiddle, p_right);
+    //Serial.print(buf);
+    //sprintf(buf, "top %3d: middle: %3d bottom: %3d\n", p_top, p_vmiddle, p_bottom);
+    //Serial.print(buf);
+    shown = true;
+  }
+
+  if (block_top < p_top ) {
+    if (block_left < p_left) {
+      results[count++] = 0;
+    }
+    if (block_left < p_hmiddle && block_right > p_hmiddle) {
+      results[count++] = 1;
+    }
+    if (block_right > p_right) {
+      results[count++] = 2;
+    }
+  }
+
+  if (block_top < p_vmiddle && block_bottom > p_vmiddle) {
+    if (block_left < p_left) {
+      results[count++] = 3;
+    }
+    if (block_left < p_hmiddle && block_right > p_hmiddle) {
+      results[count++] = 4;
+    }
+    if (block_right > p_right) {
+      results[count++] = 5;
+    }
+  }
+
+  if (block_bottom > p_bottom) {
+    if (block_left < p_left) {
+      results[count++] = 6;
+    }
+    if (block_left < p_hmiddle && block_right > p_hmiddle) {
+      results[count++] = 7;
+    }
+    if (block_right > p_right) {
+      results[count++] = 8;
+    }
+  }
+  if (count <= 3) {
+    //Serial.print("This block covers: ");
+    //Serial.println(count);
+    return count;
+  } else {
+    return 0;
+  }
 }
 
 #endif

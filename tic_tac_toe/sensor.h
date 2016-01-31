@@ -30,19 +30,22 @@ class Sensor {
     bool calibrate();
 
   private:
-    int top = 15; // defaults
-    int left = 50;
+    int top = 12; // defaults
+    int left = 53;
     int bottom = 188;
-    int right = 235;
+    int right = 237;
     GameBoard* game_board;
     byte frame_hold = 0;
     // uint16_t blank_hold = 0;
     byte stable_hold = 0;
     byte cached_board[9];
     byte player_mark;
+    bool shown = false;
 
     bool boards_equal(byte board_a[], byte board_b[]);
     byte *decode_board(byte board[], uint16_t object_cnt);
+    byte *decode_block(byte board[], Block block);
+    byte pos_covered(Block block, byte results[9]);
     byte board_count(byte board[]);
     byte diff_game_board(byte board[]);
 };
