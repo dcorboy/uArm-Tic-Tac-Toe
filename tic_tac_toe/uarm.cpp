@@ -1,12 +1,27 @@
 #include "uarm.h"
 
 #ifdef NO_UARM
+
+#define SERVO_ROT_NUM              1
+#define SERVO_LEFT_NUM              2
+#define SERVO_RIGHT_NUM             3
+#define SERVO_HAND_ROT_NUM            4
+     
+#define MATH_PI  3.141592653589793238463
+
 class uArmClass {
   public:
     uArmClass();
 
     void moveTo(double x, double y, double z, int relative, double time);
     void moveTo(double x, double y, double z, int relative, double time_spend, int servo_4_relative, double servo_4_angle);
+    
+      void getCalXYZ(double theta_1, double theta_2, double theta_3, double& x, double& y, double &z) {};
+      void getCalXYZ(double& x, double& y, double &z) {};
+    void alert(byte times, byte runTime, byte stopTime);
+    
+  double readAngle(byte servo_num) {};
+      void moveToAtOnce(double x, double y, double z, int relative, double servo_4_angle) {};
 };
 
 uArmClass::uArmClass() {}
@@ -14,6 +29,8 @@ void uArmClass::moveTo(double x, double y, double z, int relative, double time) 
 }
 void uArmClass::moveTo(double x, double y, double z, int relative, double time_spend, int servo_4_relative, double servo_4_angle) {
 }
+void uArmClass::alert(byte times, byte runTime, byte stopTime) {}
+
 uArmClass uarm;
 #endif
 
