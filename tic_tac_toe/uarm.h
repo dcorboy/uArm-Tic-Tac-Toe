@@ -1,4 +1,4 @@
-//#define NO_UARM
+#define NO_UARM
 
 #include <arduino.h>
 #ifndef NO_UARM

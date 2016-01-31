@@ -25,6 +25,8 @@
 #define STABLE_BOARD  6
 #define DEBUG         7
 #define PICKUP_TESTS  8
+#define RAW_VALUES    9
+#define CALIBRATE    10
 
 GameBoard board;
 GameLogic logic(&board);
@@ -121,16 +123,14 @@ void loop() {
         change_state(DECODE_BOARD);
       } else if (input == 's') {
         change_state(STABLE_BOARD);
-      } else if (input == 'c') {
+      } else if (input == 'l') {
         uarm_ctrl.show_xyz();
       } else if (input == 'p') {
         change_state(PICKUP_TESTS);
-      } else if (input == 'l') {
-        if (digitalRead(STOPPER) == HIGH) {
-          Serial.println(F("HIGH"));
-        } else {
-          Serial.println(F("LOW"));
-        }
+      } else if (input == 'v') {
+        change_state(RAW_VALUES);
+      } else if (input == 'c') {
+        change_state(CALIBRATE);
       } else if (input != NO_VAL) {
         byte num = input - '0';
         if (num >= 1 && num <= 9) {
@@ -182,7 +182,23 @@ void loop() {
         //uarm_ctrl.make_move(8);
         uarm_ctrl.wait_ready();
         uarm_ctrl.alert(2);
+      } else if (input == 'l') {
+        if (digitalRead(STOPPER) == HIGH) {
+          Serial.println(F("HIGH"));
+        } else {
+          Serial.println(F("LOW"));
+        }
       }
+      break;
+    case RAW_VALUES :
+        if (sensor.show_raw_values()) {
+          change_state(DEBUG);
+        }
+      break;
+    case CALIBRATE :
+        if (sensor.calibrate()) {
+          change_state(DEBUG);
+        }
       break;
   }
 }
@@ -232,8 +248,8 @@ void change_state(byte new_state) {
       }
     case DEBUG :
       Serial.println(F("(R)eset, (D)ecode board, (S)table board, Board Positions (1-9)"));
-      Serial.println(F("(X)-Markers, (O)-Markers, (W)ait position, (C)urrent XYZ"));
-      Serial.println(F("(P)ickup tests or (Q)uit"));
+      Serial.println(F("(X)-Markers, (O)-Markers, (W)ait position, Current (L)ocation"));
+      Serial.println(F("(P)ickup tests, Raw (V)alues, (C)alibrate or (Q)uit"));
       break;
     case PICKUP_TESTS :
       Serial.println(F("(L)imit switch, (D)own to touch, (U)p to lift"));
