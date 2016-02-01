@@ -1,4 +1,4 @@
-#define NO_UARM
+//#define NO_UARM
 
 #include <arduino.h>
 #ifndef NO_UARM
@@ -22,6 +22,15 @@
 #endif
 
 #define NO_VAL 255
+
+// interpolation intervals
+#define INTERP_INTVLS 50
+
+// interpolation types
+#define INTERP_LINEAR      0
+#define INTERP_EASE_INOUT  1
+#define INTERP_EASE_IN     2
+#define INTERP_EASE_OUT    3
 
 // position definitions
 #define TOP_ROW    -10
@@ -89,6 +98,10 @@ class uArm_Controller {
     };
 
     void move_wait_position();
+    void move_to_by_angle(double x, double y, double z, double tgt_hand, float duration, byte ease_type);
+    void execute_move(double (&rot)[INTERP_INTVLS], double (&left)[INTERP_INTVLS], double (&right)[INTERP_INTVLS], double (&hand)[INTERP_INTVLS], float duration, bool debug);
+    void interpolate(double start_val, double end_val, byte frame_start, byte frame_dur, double (&interp_val)[INTERP_INTVLS], byte type);
+    void show_angles(double theta_1, double theta_2, double theta_3, double hand_angle);
     void pickup_drop(bool pickup, double current_x, double current_y, double current_z, int tgt_rotation);
 };
 

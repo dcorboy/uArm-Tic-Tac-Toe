@@ -1,12 +1,12 @@
 #include "uarm.h"
 
 #ifdef NO_UARM
-
+ua
 #define SERVO_ROT_NUM              1
 #define SERVO_LEFT_NUM              2
 #define SERVO_RIGHT_NUM             3
 #define SERVO_HAND_ROT_NUM            4
-     
+
 #define MATH_PI  3.141592653589793238463
 
 class uArmClass {
@@ -15,13 +15,13 @@ class uArmClass {
 
     void moveTo(double x, double y, double z, int relative, double time);
     void moveTo(double x, double y, double z, int relative, double time_spend, int servo_4_relative, double servo_4_angle);
-    
-      void getCalXYZ(double theta_1, double theta_2, double theta_3, double& x, double& y, double &z) {};
-      void getCalXYZ(double& x, double& y, double &z) {};
+
+    void getCalXYZ(double theta_1, double theta_2, double theta_3, double& x, double& y, double &z) {};
+    void getCalXYZ(double& x, double& y, double &z) {};
     void alert(byte times, byte runTime, byte stopTime);
-    
-  double readAngle(byte servo_num) {};
-      void moveToAtOnce(double x, double y, double z, int relative, double servo_4_angle) {};
+
+    double readAngle(byte servo_num) {};
+    void moveToAtOnce(double x, double y, double z, int relative, double servo_4_angle) {};
 };
 
 uArmClass::uArmClass() {}
@@ -77,15 +77,6 @@ void uArm_Controller::new_game(bool play_first) {
 }
 
 void uArm_Controller::make_move(byte posn) {
-  //  for (int i = 0; i < 9; i++) {
-  //    Serial.print(F("Board positions: "));
-  //    Serial.print(i);
-  //    Serial.print(F(" -- X: "));
-  //    Serial.print(board_positions[i][0]);
-  //    Serial.print(", Y: ");
-  //    Serial.println(board_positions[i][1]);
-  //  }
-#if 1
   Serial.print(F("Move to position: "));
   Serial.print(posn);
   Serial.print(F(" -- X: "));
@@ -94,7 +85,6 @@ void uArm_Controller::make_move(byte posn) {
   Serial.print(board_positions[posn][1]);
   Serial.print(F(", Z: "));
   Serial.println(BOARD_HGT);
-#endif
   move_marker(my_mark == 1 ? X_MARKER_X : O_MARKER_X, MARKERS_Y, MARKER_HGT, board_positions[posn][0], board_positions[posn][1], BOARD_HGT);
 }
 
@@ -127,7 +117,8 @@ void uArm_Controller::show_board_position(byte posn) {
   Serial.print(y);
   Serial.print(F(", Z: "));
   Serial.println(z);
-  uarm.moveTo(x, y, z, 0, 1, false, hand_offset(0));
+  //uarm.moveTo(x, y, z, 0, 1, false, hand_offset(0));
+  move_to_by_angle(x, y, z, hand_offset(0), 1, INTERP_EASE_INOUT);
 }
 
 void uArm_Controller::show_xyz() {
@@ -156,7 +147,9 @@ void uArm_Controller::show_xyz() {
 // private members
 
 void uArm_Controller::move_wait_position() {
-  uarm.moveTo(WAIT_X, WAIT_Y, WAIT_Z, 0, 1.5, false, hand_offset(0));
+  //uarm.moveTo(WAIT_X, WAIT_Y, WAIT_Z, 0, 1.5, false, hand_offset(0));
+  move_to_by_angle(WAIT_X, WAIT_Y, WAIT_Z, hand_offset(0), 1.5, INTERP_EASE_INOUT);
+
 }
 
 // this is the main move procedure to pickup a playing piece at one location and drop it at another
@@ -166,14 +159,13 @@ void uArm_Controller::move_wait_position() {
 void uArm_Controller::move_marker(double init_x, double init_y, double init_z, double dest_x, double dest_y, double dest_z) {
   int start_rot = hand_offset(-round(atan(init_x / init_y) * 180.0 / MATH_PI));
   int end_rot = hand_offset(-round(atan(dest_x / dest_y) * 180.0 / MATH_PI));
-  uarm.moveTo(init_x, init_y, init_z, false, 1, false, start_rot);              // move to the initial position
+  move_to_by_angle(init_x, init_y, init_z, start_rot, 1, INTERP_EASE_INOUT);              // move to the initial position
   pickup_drop(true, init_x, init_y, init_z, start_rot);               // move end-effector downwards until stopper hits something, then pick it up
   uarm.moveTo(0, 0, 4, true, 1, false, start_rot);                           // lift the captured object up off the pile
-  uarm.moveTo(dest_x, dest_y, dest_z, false, 1, false, end_rot);              // move to the destination position
+  move_to_by_angle(dest_x, dest_y, dest_z, end_rot, 1, INTERP_EASE_INOUT);              // move to the destination position
   pickup_drop(false, dest_x, dest_y, dest_z, end_rot);  // move end-effector downwards until stopper hits something, then drop it
   uarm.moveTo(0, 0, 4, true, 1, false, end_rot);      // move the end-effector upwards to clear the playing area
 }
-
 
 void uArm_Controller::down_to_touch() {
   double current_x, current_y, current_z;
@@ -221,11 +213,12 @@ void uArm_Controller::pickup_drop(bool pickup, double current_x, double current_
         uarm.moveToAtOnce(current_x, current_y, current_z, false, tgt_rotation);
         delay(100);
       } else {
-          Serial.println("stopper hit!");
+        Serial.println("stopper hit!");
       }
     }
   } else {
-    uarm.moveTo(current_x, current_y, 7, false, .5, false, tgt_rotation);
+    //uarm.moveTo(current_x, current_y, 7, false, .5, false, tgt_rotation);
+    move_to_by_angle(current_x, current_y, 7, tgt_rotation, .5, INTERP_EASE_INOUT);
   }
 
   // at this point, the stopper is depressed so we can pickup or release via the pump
@@ -249,5 +242,101 @@ void uArm_Controller::pickup_drop(bool pickup, double current_x, double current_
 void uArm_Controller::postgame(byte winner) {
   // if winner, 3 xy circles at sensor hgt
   // if loser, shake "head" back and forth as shrink back to 0,0,0
+}
+
+
+
+void uArm_Controller::show_angles(double theta_1, double theta_2, double theta_3, double hand_angle) {
+  Serial.print(F("Rot: "));
+  Serial.println(theta_1);
+  Serial.print(F("Left: "));
+  Serial.println(theta_2);
+  Serial.print(F("Right: "));
+  Serial.println(theta_3);
+  Serial.print(F("Hand: "));
+  Serial.println(hand_angle);
+}
+
+void uArm_Controller::move_to_by_angle(double x, double y, double z, double tgt_hand, float duration, byte ease_type) {
+
+  // find current angles
+  double cur_rot = uarm.readAngle(SERVO_ROT_NUM);
+  double cur_left = uarm.readAngle(SERVO_LEFT_NUM);
+  double cur_right = uarm.readAngle(SERVO_RIGHT_NUM);
+  double cur_hand = uarm.readAngle(SERVO_HAND_ROT_NUM);
+
+  // find target angles
+  double tgt_rot;
+  double tgt_left;
+  double tgt_right;
+  uarm.getCalAngles(x, y, z, tgt_rot, tgt_left, tgt_right);
+
+  // interpolate 'em
+  double rot[INTERP_INTVLS];
+  double left[INTERP_INTVLS];
+  double right[INTERP_INTVLS];
+  double hand[INTERP_INTVLS];
+
+  interpolate(cur_rot, tgt_rot, 0, INTERP_INTVLS, rot, ease_type);
+  interpolate(cur_left, tgt_left, 0, INTERP_INTVLS, left, ease_type);
+  interpolate(cur_right, tgt_right, 0, INTERP_INTVLS, right, ease_type);
+  interpolate(cur_hand, tgt_hand, 0, INTERP_INTVLS, hand, ease_type);
+
+  execute_move(rot, left, right, hand, duration, false);
+  l_movementTrigger = 1;
+  uarm.writeAngle(tgt_rot, tgt_left, tgt_right, tgt_hand);
+  //uarm.detachAll();
+}
+
+void uArm_Controller::execute_move(double (&rot)[INTERP_INTVLS], double (&left)[INTERP_INTVLS], double (&right)[INTERP_INTVLS], double (&hand)[INTERP_INTVLS], float duration, bool debug) {
+  if (!debug) {
+    uarm.attachAll();
+  }
+
+  for (byte i = 0; i < INTERP_INTVLS; i++)
+  {
+    if (!debug) {
+      l_movementTrigger = 1;
+      uarm.writeAngle(rot[i], left[i], right[i], hand[i]);
+      delay(duration * 1000 / INTERP_INTVLS);
+    } else {
+      show_angles(rot[i], left[i], right[i], hand[i]);
+    }
+  }
+}
+
+void uArm_Controller::interpolate(double start_val, double end_val, byte frame_start, byte frame_dur, double (&interp_val)[INTERP_INTVLS], byte type) {
+  double delta = end_val - start_val;
+  for (byte f = 0; f < frame_dur; f++) {
+    switch (type) {
+      case INTERP_LINEAR :
+        interp_val[frame_start + f] = delta * f / frame_dur + start_val;
+        break;
+      case INTERP_EASE_INOUT :
+        {
+          float t = f / (frame_dur / 2.0);
+          //Serial.println(t);
+          if (t < 1) {
+            interp_val[frame_start + f] = delta / 2 * t * t + start_val;
+          } else {
+            t--;
+            interp_val[frame_start + f] = -delta / 2 * (t * (t - 2) - 1) + start_val;
+          }
+        }
+        break;
+      case INTERP_EASE_IN :
+        {
+          float t = (float)f / frame_dur;
+          interp_val[frame_start + f] = delta * t * t + start_val;
+        }
+        break;
+      case INTERP_EASE_OUT :
+        {
+          float t = (float)f / frame_dur;
+          interp_val[frame_start + f] = -delta * t * (t - 2) + start_val;
+        }
+        break;
+    }
+  }
 }
 
