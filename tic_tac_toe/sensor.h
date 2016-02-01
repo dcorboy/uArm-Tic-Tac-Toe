@@ -1,11 +1,11 @@
-//#define NO_PIXY
+#define NO_PIXY
 
 #include <arduino.h>
 #include "gameboard.h"
 #include <SPI.h>
-#ifndef NO_PIXY
+//#ifndef NO_PIXY
 #include <Pixy.h>
-#endif
+//#endif
 
 #define NO_VAL 255
 

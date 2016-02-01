@@ -70,6 +70,13 @@ byte *Sensor::check_board(byte board[]) {
   return NULL;
 }
 
+bool Sensor::calibrate() {
+  return true;
+}
+
+bool Sensor::show_raw_values(){
+  return true;
+}
 #else
 
 byte *Sensor::valid_board(byte board[]) {
@@ -228,6 +235,55 @@ byte Sensor::pos_covered(Block block, byte results[9]) {
   }
 }
 
+bool Sensor::calibrate() {
+  uint16_t object_cnt = pixy.getBlocks();
+  byte found = 0;
+
+  if (object_cnt > 0) {
+    frame_hold++;
+    if (frame_hold % 64 == 0) {
+      for (int i = 0; i < object_cnt; i++) {
+        if (pixy.blocks[i].width > CALIB_MARKER_MIN_SIZE && pixy.blocks[i].height > CALIB_MARKER_MIN_SIZE) {  // filter small blocks
+          if (pixy.blocks[i].signature == 1 && pixy.blocks[i].x < CALIB_CENTER_X && pixy.blocks[i].y < CALIB_CENTER_Y) {
+            // if there's an X in the upper left that is big enough, we get here
+            top = pixy.blocks[i].y - (pixy.blocks[i].height / 2);
+            left = pixy.blocks[i].x - (pixy.blocks[i].width / 2);
+            found++;
+            char buf[64];
+            sprintf(buf, "Found top: %3d  left: %3d\n", top, left);
+            Serial.print(buf);
+          } else if (pixy.blocks[i].signature == 2 && pixy.blocks[i].x > CALIB_CENTER_X && pixy.blocks[i].y > CALIB_CENTER_Y) {
+            // if there's an O in the bottom-right that is big enough, we get here
+            bottom = pixy.blocks[i].y + (pixy.blocks[i].height / 2);
+            right = pixy.blocks[i].x + (pixy.blocks[i].width / 2);
+            found++;
+            char buf[64];
+            sprintf(buf, "Found bottom: %3d  right: %3d\n", bottom, right);
+            Serial.print(buf);
+          }
+        }
+      }
+    }
+  }
+  return (found == 2);
+}
+
+bool Sensor::show_raw_values() {
+  uint16_t object_cnt = pixy.getBlocks();
+
+  if (object_cnt > 0) {
+    frame_hold++;
+    if (frame_hold % 64 == 0) {
+      char buf[64];
+      for (int i = 0; i < object_cnt; i++) {
+        sprintf(buf, "Block %2d:  x: %3d y: %3d -- wid: %3d hgt: %3d\n", pixy.blocks[i].signature, pixy.blocks[i].x, pixy.blocks[i].y, pixy.blocks[i].width, pixy.blocks[i].height);
+        Serial.print(buf);
+      }
+      return true;
+    }
+  }
+  return false;
+}
 #endif
 
 bool Sensor::boards_equal(byte board_a[], byte board_b[]) {
@@ -262,56 +318,6 @@ byte Sensor::diff_game_board(byte board[]) {
     }
   }
   return NO_VAL;
-}
-
-bool Sensor::show_raw_values() {
-  uint16_t object_cnt = pixy.getBlocks();
-
-  if (object_cnt > 0) {
-    frame_hold++;
-    if (frame_hold % 64 == 0) {
-      char buf[64];
-      for (int i = 0; i < object_cnt; i++) {
-        sprintf(buf, "Block %2d:  x: %3d y: %3d -- wid: %3d hgt: %3d\n", pixy.blocks[i].signature, pixy.blocks[i].x, pixy.blocks[i].y, pixy.blocks[i].width, pixy.blocks[i].height);
-        Serial.print(buf);
-      }
-      return true;
-    }
-  }
-  return false;
-}
-
-bool Sensor::calibrate() {
-  uint16_t object_cnt = pixy.getBlocks();
-  byte found = 0;
-
-  if (object_cnt > 0) {
-    frame_hold++;
-    if (frame_hold % 64 == 0) {
-      for (int i = 0; i < object_cnt; i++) {
-        if (pixy.blocks[i].width > CALIB_MARKER_MIN_SIZE && pixy.blocks[i].height > CALIB_MARKER_MIN_SIZE) {  // filter small blocks
-          if (pixy.blocks[i].signature == 1 && pixy.blocks[i].x < CALIB_CENTER_X && pixy.blocks[i].y < CALIB_CENTER_Y) {
-            // if there's an X in the upper left that is big enough, we get here
-            top = pixy.blocks[i].y - (pixy.blocks[i].height / 2);
-            left = pixy.blocks[i].x - (pixy.blocks[i].width / 2);
-            found++;
-            char buf[64];
-            sprintf(buf, "Found top: %3d  left: %3d\n", top, left);
-            Serial.print(buf);
-          } else if (pixy.blocks[i].signature == 2 && pixy.blocks[i].x > CALIB_CENTER_X && pixy.blocks[i].y > CALIB_CENTER_Y) {
-            // if there's an O in the bottom-right that is big enough, we get here
-            bottom = pixy.blocks[i].y + (pixy.blocks[i].height / 2);
-            right = pixy.blocks[i].x + (pixy.blocks[i].width / 2);
-            found++;
-            char buf[64];
-            sprintf(buf, "Found bottom: %3d  right: %3d\n", bottom, right);
-            Serial.print(buf);
-          }
-        }
-      }
-    }
-  }
-  return (found == 2);
 }
 
 //byte Sensor::detect_start() {
