@@ -222,7 +222,7 @@ void uArm_Controller::pickup_drop(bool pickup, double current_x, double current_
     }
   } else {
     //uarm.moveTo(current_x, current_y, 7, false, .5, false, tgt_rotation);
-    move_to_by_angle(current_x, current_y, 5, tgt_rotation, .5, INTERP_EASE_INOUT);
+    move_to_by_angle(current_x, current_y, 6, tgt_rotation, .5, INTERP_EASE_INOUT);
   }
 
   // at this point, the stopper is depressed so we can pickup or release via the pump
@@ -263,11 +263,25 @@ void uArm_Controller::show_angles(double theta_1, double theta_2, double theta_3
 
 void uArm_Controller::move_to_by_angle(double x, double y, double z, double tgt_hand, float duration, byte ease_type) {
 
-  // find current angles
-  double cur_rot = uarm.readAngle(SERVO_ROT_NUM);
-  double cur_left = uarm.readAngle(SERVO_LEFT_NUM);
-  double cur_right = uarm.readAngle(SERVO_RIGHT_NUM);
-  double cur_hand = uarm.readAngle(SERVO_HAND_ROT_NUM);
+  if (!cur_angles_init) {
+    Serial.println("Angles inited!");
+    // find current angles
+    cur_rot = uarm.readAngle(SERVO_ROT_NUM);
+    cur_left = uarm.readAngle(SERVO_LEFT_NUM);
+    cur_right = uarm.readAngle(SERVO_RIGHT_NUM);
+    cur_hand = uarm.readAngle(SERVO_HAND_ROT_NUM);
+    cur_angles_init = true;
+    //    } else  {
+    //    Serial.println("I thought they were:");
+    //    show_angles(cur_rot, cur_left, cur_right, cur_hand);
+    //    // find current angles
+    //    cur_rot = uarm.readAngle(SERVO_ROT_NUM);
+    //    cur_left = uarm.readAngle(SERVO_LEFT_NUM);
+    //    cur_right = uarm.readAngle(SERVO_RIGHT_NUM);
+    //    cur_hand = uarm.readAngle(SERVO_HAND_ROT_NUM);
+    //    Serial.println("But really they were:");
+    //    show_angles(cur_rot, cur_left, cur_right, cur_hand);
+  }
 
   // find target angles
   double tgt_rot;
@@ -277,23 +291,27 @@ void uArm_Controller::move_to_by_angle(double x, double y, double z, double tgt_
 
   if (duration == 0) {
     uarm.writeAngle(tgt_rot, tgt_left, tgt_right, tgt_hand);  // moveToAtOnce
-    return;
+  } else {
+
+    // interpolate 'em
+    double rot[INTERP_INTVLS];
+    double left[INTERP_INTVLS];
+    double right[INTERP_INTVLS];
+    double hand[INTERP_INTVLS];
+
+    interpolate(cur_rot, tgt_rot, 0, INTERP_INTVLS, rot, ease_type);
+    interpolate(cur_left, tgt_left, 0, INTERP_INTVLS, left, ease_type);
+    interpolate(cur_right, tgt_right, 0, INTERP_INTVLS, right, ease_type);
+    interpolate(cur_hand, tgt_hand, 0, INTERP_INTVLS, hand, ease_type);
+
+    execute_move(rot, left, right, hand, duration, false);
+    l_movementTrigger = 1;
+    uarm.writeAngle(tgt_rot, tgt_left, tgt_right, tgt_hand);
   }
-
-  // interpolate 'em
-  double rot[INTERP_INTVLS];
-  double left[INTERP_INTVLS];
-  double right[INTERP_INTVLS];
-  double hand[INTERP_INTVLS];
-
-  interpolate(cur_rot, tgt_rot, 0, INTERP_INTVLS, rot, ease_type);
-  interpolate(cur_left, tgt_left, 0, INTERP_INTVLS, left, ease_type);
-  interpolate(cur_right, tgt_right, 0, INTERP_INTVLS, right, ease_type);
-  interpolate(cur_hand, tgt_hand, 0, INTERP_INTVLS, hand, ease_type);
-
-  execute_move(rot, left, right, hand, duration, false);
-  l_movementTrigger = 1;
-  uarm.writeAngle(tgt_rot, tgt_left, tgt_right, tgt_hand);
+  cur_rot = tgt_rot;
+  cur_left = tgt_left;
+  cur_right = tgt_right;
+  cur_hand = tgt_hand;
   //uarm.detachAll();
 }
 

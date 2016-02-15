@@ -85,6 +85,11 @@ class uArm_Controller {
   private:
     byte my_mark;
     byte their_mark;
+    bool cur_angles_init = false;
+    double cur_rot;
+    double cur_left;
+    double cur_right;
+    double cur_hand;
     const signed char board_positions[9][2] PROGMEM = {
       {LFT_COL, TOP_ROW},
       {MID_COL, TOP_ROW},
