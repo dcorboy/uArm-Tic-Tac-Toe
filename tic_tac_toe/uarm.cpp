@@ -1,7 +1,7 @@
 #include "uarm.h"
 
 #ifdef NO_UARM
-ua
+
 #define SERVO_ROT_NUM              1
 #define SERVO_LEFT_NUM              2
 #define SERVO_RIGHT_NUM             3
@@ -161,10 +161,12 @@ void uArm_Controller::move_marker(double init_x, double init_y, double init_z, d
   int end_rot = hand_offset(-round(atan(dest_x / dest_y) * 180.0 / MATH_PI));
   move_to_by_angle(init_x, init_y, init_z, start_rot, 1, INTERP_EASE_INOUT);              // move to the initial position
   pickup_drop(true, init_x, init_y, init_z, start_rot);               // move end-effector downwards until stopper hits something, then pick it up
-  uarm.moveTo(0, 0, 4, true, 1, false, start_rot);                           // lift the captured object up off the pile
+  //uarm.moveTo(0, 0, 4, true, 1, false, start_rot);                           // lift the captured object up off the pile
+  move_to_by_angle(init_x, init_y, init_z, start_rot, 1, INTERP_EASE_INOUT);  // lift the captured object up off the pile by angle
   move_to_by_angle(dest_x, dest_y, dest_z, end_rot, 1, INTERP_EASE_INOUT);              // move to the destination position
   pickup_drop(false, dest_x, dest_y, dest_z, end_rot);  // move end-effector downwards until stopper hits something, then drop it
-  uarm.moveTo(0, 0, 4, true, 1, false, end_rot);      // move the end-effector upwards to clear the playing area
+  // uarm.moveTo(0, 0, 4, true, 1, false, end_rot);      // move the end-effector upwards to clear the playing area
+  move_to_by_angle(dest_x, dest_y, 8, end_rot, 1, INTERP_EASE_INOUT);        // move the end-effector upwards to clear the playing area
 }
 
 void uArm_Controller::down_to_touch() {
@@ -177,7 +179,8 @@ void uArm_Controller::down_to_touch() {
     Serial.println(stopper);
     if (stopper == HIGH) { // if we haven't yet, move downwards a bit at a time
       current_z = current_z - .5;  // move downwards 2 cm every .5s (slower will not depress the limit switch)
-      uarm.moveToAtOnce(current_x, current_y, current_z, false, 0);
+      move_to_by_angle(current_x, current_y, current_z, 0, 0, 0);  // a moveToAtOnce by angle
+      //uarm.moveToAtOnce(current_x, current_y, current_z, false, 0);
       delay(250);
     }
   }
@@ -210,7 +213,8 @@ void uArm_Controller::pickup_drop(bool pickup, double current_x, double current_
       stopper = digitalRead(STOPPER);  // low means we hit something
       if (stopper == HIGH) { // if we haven't yet, move downwards a bit at a time
         current_z = current_z - .5;  // move downwards (too slow will not depress the limit switch)
-        uarm.moveToAtOnce(current_x, current_y, current_z, false, tgt_rotation);
+        //uarm.moveToAtOnce(current_x, current_y, current_z, false, tgt_rotation);
+        move_to_by_angle(current_x, current_y, current_z, tgt_rotation, 0, 0);  // a moveToAtOnce by angle
         delay(100);
       } else {
         Serial.println("stopper hit!");
@@ -218,7 +222,7 @@ void uArm_Controller::pickup_drop(bool pickup, double current_x, double current_
     }
   } else {
     //uarm.moveTo(current_x, current_y, 7, false, .5, false, tgt_rotation);
-    move_to_by_angle(current_x, current_y, 7, tgt_rotation, .5, INTERP_EASE_INOUT);
+    move_to_by_angle(current_x, current_y, 5, tgt_rotation, .5, INTERP_EASE_INOUT);
   }
 
   // at this point, the stopper is depressed so we can pickup or release via the pump
@@ -270,6 +274,11 @@ void uArm_Controller::move_to_by_angle(double x, double y, double z, double tgt_
   double tgt_left;
   double tgt_right;
   uarm.getCalAngles(x, y, z, tgt_rot, tgt_left, tgt_right);
+
+  if (duration == 0) {
+    uarm.writeAngle(tgt_rot, tgt_left, tgt_right, tgt_hand);  // moveToAtOnce
+    return;
+  }
 
   // interpolate 'em
   double rot[INTERP_INTVLS];
