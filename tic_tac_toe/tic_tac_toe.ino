@@ -165,26 +165,18 @@ void loop() {
         } else {
           Serial.println(F("LOW"));
         }
-      } else if (input == 'd') {
-        uarm_ctrl.down_to_touch();
-      } else if (input == 'u') {
-        uarm_ctrl.show_board_position(WAIT_POS);
-      } else if (input == 'a') {
-        uarm_ctrl.attach_release(true);
-      } else if (input == 'r') {
-        uarm_ctrl.attach_release(false);
-      } else if (input == 'l') {
-        if (digitalRead(STOPPER) == HIGH) {
-          Serial.println(F("HIGH"));
-        } else {
-          Serial.println(F("LOW"));
-        }
       } else if (input == 'x') {
         uarm_ctrl.set_marker(1);
         Serial.println(F("Mark set to 'X'"));
       } else if (input == 'o') {
         uarm_ctrl.set_marker(2);
         Serial.println(F("Mark set to 'O'"));
+      } else if (input == 't') {
+        uarm_ctrl.show_board_position(WAIT_POS);
+        uarm_ctrl.move_marker(-14, -21, 10, -14, -21, 10);
+        delay(1000);
+        uarm_ctrl.show_board_position(WAIT_POS);
+        uarm_ctrl.move_marker(14, -21, 10, 14, -21, 10);
       } else if (input != NO_VAL) {
         byte num = input - '0';
         if (num >= 1 && num <= 9) {
@@ -256,8 +248,8 @@ void change_state(byte new_state) {
       Serial.println(F("(P)ickup tests, Raw (V)alues, (C)alibrate or (Q)uit"));
       break;
     case PICKUP_TESTS :
-      Serial.println(F("(L)imit switch, (D)own to touch, (U)p to lift"));
-      Serial.println(F("(A)ttach, (R)elease, Move X to (1-9) or (Q)uit"));
+      Serial.println(F("(L)imit switch, Move to (1-9)"));
+      Serial.println(F("((X) marker, (Y) marker, (R)otate test or (Q)uit"));
       break;
   }
   state = new_state;
