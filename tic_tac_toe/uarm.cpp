@@ -163,17 +163,12 @@ void uArm_Controller::move_marker(double init_x, double init_y, double init_z, d
   Serial.println(start_rot);
   Serial.print("End Rot: ");
   Serial.println(end_rot);
-  move_to_by_angle(init_x, init_y, init_z, hand_offset(0), 1, INTERP_EASE_INOUT);              // move to the initial position
-  move_to_by_angle(init_x, init_y, init_z, start_rot, 0, INTERP_LINEAR);              // set the hand
+  move_to_by_angle(init_x, init_y, init_z, start_rot, 1, INTERP_EASE_INOUT);              // move to the initial position
   pickup_drop(true, init_x, init_y, init_z, start_rot);               // move end-effector downwards until stopper hits something, then pick it up
-  //uarm.moveTo(0, 0, 4, true, 1, false, start_rot);                           // lift the captured object up off the pile
-  move_to_by_angle(init_x, init_y, init_z, start_rot, 1, INTERP_EASE_INOUT);  // lift the captured object up off the pile by angle
-  move_to_by_angle(WAIT_X, WAIT_Y, init_z, start_rot, 1, INTERP_EASE_INOUT);              // move to a common central position
-  move_to_by_angle(WAIT_X, WAIT_Y, init_z, hand_offset(0), 0, INTERP_EASE_INOUT);              // move to a common central position
-  move_to_by_angle(dest_x, dest_y, dest_z, hand_offset(0), 1, INTERP_EASE_INOUT);              // move to the destination position
-  move_to_by_angle(dest_x, dest_y, dest_z, end_rot, 0, INTERP_LINEAR);              // move to the destination position
+  move_to_by_angle(init_x, init_y, init_z, start_rot, .5, INTERP_EASE_INOUT);  // lift the captured object up off the pile by angle
+  move_to_by_angle(WAIT_X, WAIT_Y, init_z, hand_offset(0), 1, INTERP_EASE_INOUT);              // move to a common central position
+  move_to_by_angle(dest_x, dest_y, dest_z, end_rot, 1, INTERP_EASE_INOUT);              // move to the destination position
   pickup_drop(false, dest_x, dest_y, dest_z, end_rot);  // move end-effector downwards until stopper hits something, then drop it
-  // uarm.moveTo(0, 0, 4, true, 1, false, end_rot);      // move the end-effector upwards to clear the playing area
   move_to_by_angle(dest_x, dest_y, 10, end_rot, .5, INTERP_EASE_INOUT);        // move the end-effector upwards to clear the playing area
 }
 
