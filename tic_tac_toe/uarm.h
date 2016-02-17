@@ -33,15 +33,15 @@
 #define INTERP_EASE_OUT    3
 
 // position definitions
-#define TOP_ROW    -10
-#define MID_ROW    -17
-#define BOT_ROW    -24
+#define TOP_ROW    -14
+#define MID_ROW    -21
+#define BOT_ROW    -28
 
 #define LFT_COL     -7
 #define MID_COL      0
 #define RGT_COL      7
 
-#define MARKERS_Y   -17
+#define MARKERS_Y   -21
 #define X_MARKER_X  -14
 #define O_MARKER_X   14
 
@@ -49,7 +49,7 @@
 #define MARKER_HGT   10
 
 #define WAIT_X       0
-#define WAIT_Y       -17
+#define WAIT_Y       -21
 #define WAIT_Z       20
 
 // these pseudo positions indicate the two marker stacks and the wait (sensor) position
@@ -58,8 +58,7 @@
 #define WAIT_POS 11
 
 // hand offset (hand doesn't do negative numbers)
-#define hand_offset(x) x + 45
-
+#define hand_offset(x) x + 90
 
 class uArm_Controller {
   public:
@@ -80,6 +79,7 @@ class uArm_Controller {
     void down_to_touch();
     void attach_release(bool pickup);
     void move_marker(double init_x, double init_y, double init_z, double dest_x, double dest_y, double dest_z);
+    void set_marker(byte mark) { my_mark = mark; }
     // ^^ DEBUG only SHOULD BE PRIVATE
 
   private:
