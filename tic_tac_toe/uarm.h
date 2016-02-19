@@ -41,12 +41,14 @@
 #define MID_COL      0
 #define RGT_COL      7
 
-#define MARKERS_Y   -21
-#define X_MARKER_X  -14
-#define O_MARKER_X   14
+#define X_MARKER_X  -15 // old -14, new -16
+#define X_MARKER_Y  -15 // old -21, new -15
+#define O_MARKER_X   15 // old +14, new +16
+#define O_MARKER_Y  -14 // old -21, new -15
 
 #define BOARD_HGT    10 // 8
 #define MARKER_HGT   10
+#define DROP_HGT     6.5
 
 #define WAIT_X       0
 #define WAIT_Y       -21
@@ -76,11 +78,9 @@ class uArm_Controller {
     // debugs
     void show_board_position(byte posn);
     void show_xyz();
-    void down_to_touch();
-    void attach_release(bool pickup);
     void move_marker(double init_x, double init_y, double init_z, double dest_x, double dest_y, double dest_z);
     void set_marker(byte mark) { my_mark = mark; }
-    // ^^ DEBUG only SHOULD BE PRIVATE
+    // ^^ DEBUG only move_marker SHOULD BE PRIVATE
 
   private:
     byte my_mark;
@@ -109,6 +109,10 @@ class uArm_Controller {
     void show_angles(double theta_1, double theta_2, double theta_3, double hand_angle);
     void pickup_drop(bool pickup, double current_x, double current_y, double current_z, int tgt_rotation);
 };
+
+extern bool g_always_init;
+extern bool g_orig_move;
+extern bool g_no_rotate;
 
 #endif
 

@@ -131,6 +131,10 @@ void loop() {
         change_state(RAW_VALUES);
       } else if (input == 'c') {
         change_state(CALIBRATE);
+      } else if (input == 'm') {
+        g_orig_move = !g_orig_move;
+        Serial.print(F("Original movement: "));
+        Serial.println(g_orig_move);
       } else if (input != NO_VAL) {
         byte num = input - '0';
         if (num >= 1 && num <= 9) {
@@ -159,7 +163,7 @@ void loop() {
     case PICKUP_TESTS :
       if (input == 'q') {
         change_state(DEBUG);
-      } else if (input == 'l') {
+      } else if (input == 's') {
         if (digitalRead(STOPPER) == HIGH) {
           Serial.println(F("HIGH"));
         } else {
@@ -177,6 +181,14 @@ void loop() {
         delay(1000);
         uarm_ctrl.show_board_position(WAIT_POS);
         uarm_ctrl.move_marker(14, -21, 10, 14, -21, 10);
+      } else if (input == 'l') {
+        g_always_init = !g_always_init;
+        Serial.print(F("Original location method: "));
+        Serial.println(g_always_init);
+      } else if (input == 'r') {
+        g_no_rotate = !g_no_rotate;
+        Serial.print(F("Original hand rotation: "));
+        Serial.println(g_no_rotate);
       } else if (input != NO_VAL) {
         byte num = input - '0';
         if (num >= 1 && num <= 9) {
@@ -245,11 +257,12 @@ void change_state(byte new_state) {
     case DEBUG :
       Serial.println(F("(R)eset, (D)ecode board, (S)table board, Board Positions (1-9)"));
       Serial.println(F("(X)-Markers, (O)-Markers, (W)ait position, Current (L)ocation"));
-      Serial.println(F("(P)ickup tests, Raw (V)alues, (C)alibrate or (Q)uit"));
+      Serial.println(F("(P)ickup tests, Raw (V)alues, (C)alibrate, Toggle (M)ovement method or (Q)uit"));
       break;
     case PICKUP_TESTS :
-      Serial.println(F("(L)imit switch, Move to (1-9)"));
-      Serial.println(F("((X) marker, (Y) marker, (R)otate test or (Q)uit"));
+      Serial.println(F("(X) marker, (Y) marker, Move to (1-9)"));
+      Serial.println(F("Toggle (L)ocation method, Toggle hand (R)otation"));
+      Serial.println(F("Rotate (T)est, Limit (S)witch or (Q)uit"));
       break;
   }
   state = new_state;
