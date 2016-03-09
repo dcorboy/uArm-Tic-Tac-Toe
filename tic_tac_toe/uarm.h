@@ -103,7 +103,7 @@ class uArm_Controller {
     };
 
     void move_wait_position();
-    void move_to_by_angle(double x, double y, double z, double tgt_hand, float duration, byte ease_type);
+    void move_to(double x, double y, double z, double hand_angle, float duration) { uarm.moveToOpts(x, y, z, hand_angle, F_ABSOLUTE, duration, PATH_ANGLES, INTERP_EASE_INOUT); }
     void execute_move(double (&rot)[INTERP_INTVLS], double (&left)[INTERP_INTVLS], double (&right)[INTERP_INTVLS], double (&hand)[INTERP_INTVLS], float duration, bool debug);
     void interpolate(double start_val, double end_val, byte frame_start, byte frame_dur, double (&interp_val)[INTERP_INTVLS], byte type);
     void show_angles(double theta_1, double theta_2, double theta_3, double hand_angle);

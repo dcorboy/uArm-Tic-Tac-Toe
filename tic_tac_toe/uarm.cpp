@@ -34,10 +34,6 @@ void uArmClass::alert(byte times, byte runTime, byte stopTime) {}
 uArmClass uarm;
 #endif
 
-bool g_always_init = false;
-bool g_orig_move = false;
-bool g_no_rotate = false;
-
 uArm_Controller::uArm_Controller() {
 }
 
@@ -121,12 +117,7 @@ void uArm_Controller::show_board_position(byte posn) {
   Serial.print(y);
   Serial.print(F(", Z: "));
   Serial.println(z);
-  if (g_orig_move) {
-    cur_angles_init = false;
-    uarm.moveTo(x, y, z, 0, 1, false, hand_offset(0));
-  } else {
-    move_to_by_angle(x, y, z, hand_offset(0), 1, INTERP_EASE_INOUT);
-  }
+  move_to(x, y, z, hand_offset(0), 1);
 }
 
 void uArm_Controller::show_xyz() {
@@ -155,8 +146,7 @@ void uArm_Controller::show_xyz() {
 // private members
 
 void uArm_Controller::move_wait_position() {
-  //uarm.moveTo(WAIT_X, WAIT_Y, WAIT_Z, 0, 1.5, false, hand_offset(0));
-  move_to_by_angle(WAIT_X, WAIT_Y, WAIT_Z, hand_offset(0), 1.5, INTERP_EASE_INOUT);
+  move_to(WAIT_X, WAIT_Y, WAIT_Z, hand_offset(0), 1.5);
 
 }
 
@@ -167,21 +157,15 @@ void uArm_Controller::move_wait_position() {
 void uArm_Controller::move_marker(double init_x, double init_y, double init_z, double dest_x, double dest_y, double dest_z) {
   int start_rot = hand_offset(-round(atan(init_x / init_y) * 180.0 / MATH_PI * 0.85));
   int end_rot = hand_offset(-round(atan(dest_x / dest_y) * 180.0 / MATH_PI * 0.85));
-  if (g_no_rotate) {
-    start_rot = hand_offset(0);
-    end_rot = hand_offset(0);
-  }
-  Serial.print("Start Rot: ");
-  Serial.println(start_rot);
-  Serial.print("End Rot: ");
-  Serial.println(end_rot);
-  move_to_by_angle(init_x, init_y, init_z, start_rot, 1, INTERP_EASE_INOUT);              // move to the initial position
+  //  Serial.print("Start Rot: ");
+  //  Serial.println(start_rot);
+  //  Serial.print("End Rot: ");
+  //  Serial.println(end_rot);
+  move_to(init_x, init_y, init_z, start_rot, 1);              // move to the initial position
   pickup_drop(true, init_x, init_y, init_z, start_rot);               // move end-effector downwards until stopper hits something, then pick it up
-  //move_to_by_angle(init_x, init_y, init_z, start_rot, 1, INTERP_EASE_INOUT);  // lift the captured object up off the pile by angle
-  move_to_by_angle(WAIT_X, WAIT_Y, init_z, hand_offset(0), 1, INTERP_EASE_INOUT);              // move to a common central position
-  move_to_by_angle(dest_x, dest_y, dest_z, end_rot, 1, INTERP_EASE_INOUT);              // move to the destination position
+  move_to(WAIT_X, WAIT_Y, init_z, hand_offset(0), 1);              // move to a common central position
+  move_to(dest_x, dest_y, dest_z, end_rot, 1);              // move to the destination position
   pickup_drop(false, dest_x, dest_y, dest_z, end_rot);  // move end-effector downwards until stopper hits something, then drop it
-  //move_to_by_angle(dest_x, dest_y, 10, end_rot, .5, INTERP_EASE_INOUT);        // move the end-effector upwards to clear the playing area
 }
 
 void uArm_Controller::pickup_drop(bool pickup, double current_x, double current_y, double current_z, int tgt_rotation) {
@@ -191,16 +175,14 @@ void uArm_Controller::pickup_drop(bool pickup, double current_x, double current_
       stopper = digitalRead(STOPPER);  // low means we hit something
       if (stopper == HIGH) { // if we haven't yet, move downwards a bit at a time
         current_z = current_z - .5;  // move downwards (too slow will not depress the limit switch)
-        //uarm.moveToAtOnce(current_x, current_y, current_z, false, tgt_rotation);
-        move_to_by_angle(current_x, current_y, current_z, tgt_rotation, 0, 0);  // a moveToAtOnce by angle
+        move_to(current_x, current_y, current_z, tgt_rotation, 0);  // a moveToAtOnce
         delay(100);
       } else {
         Serial.println("stopper hit!");
       }
     }
   } else {  // dropping
-    //uarm.moveTo(current_x, current_y, 7, false, .5, false, tgt_rotation);
-    move_to_by_angle(current_x, current_y, DROP_HGT, tgt_rotation, .5, INTERP_EASE_INOUT);
+    move_to(current_x, current_y, DROP_HGT, tgt_rotation, .5);
   }
 
   // at this point, the stopper is depressed so we can pickup or release via the pump
@@ -209,13 +191,13 @@ void uArm_Controller::pickup_drop(bool pickup, double current_x, double current_
       digitalWrite(VALVE_EN, LOW);  // valve closed
       digitalWrite(PUMP_EN, HIGH);  // pump on
       delay(500);                   // wait 500 ms to make sure object is captured
-      move_to_by_angle(current_x, current_y, current_z + 3, tgt_rotation, 1, INTERP_EASE_INOUT);  // lift the captured object up off the pile by angle
+      move_to(current_x, current_y, current_z + 3, tgt_rotation, 1);  // lift the captured object up off the pile
       break;
     case false:                     // drop
       digitalWrite(PUMP_EN, LOW);   // pump off
       digitalWrite(VALVE_EN, HIGH); // valve open
       delay(750);                   // let the air escape
-      move_to_by_angle(current_x, current_y, DROP_HGT + 3, tgt_rotation, .5, INTERP_EASE_INOUT);  // lift the captured object up off the pile by angle
+      move_to(current_x, current_y, DROP_HGT + 3, tgt_rotation, .5);  // lift the head up to clear the playing area
       digitalWrite(VALVE_EN, LOW);  // valve closed
       break;
     default:
@@ -239,111 +221,5 @@ void uArm_Controller::show_angles(double theta_1, double theta_2, double theta_3
   Serial.println(theta_3);
   Serial.print(F("Hand: "));
   Serial.println(hand_angle);
-}
-
-void uArm_Controller::move_to_by_angle(double x, double y, double z, double tgt_hand, float duration, byte ease_type) {
-
-  if (!cur_angles_init || g_always_init) {
-    Serial.println("Recalculated servo angles!");
-    // find current angles
-    cur_rot = uarm.readAngle(SERVO_ROT_NUM);
-    cur_left = uarm.readAngle(SERVO_LEFT_NUM);
-    cur_right = uarm.readAngle(SERVO_RIGHT_NUM);
-    cur_hand = uarm.readAngle(SERVO_HAND_ROT_NUM);
-    cur_angles_init = true;
-    //    } else  {
-    //    Serial.println("I thought they were:");
-    //    show_angles(cur_rot, cur_left, cur_right, cur_hand);
-    //    // find current angles
-    //    cur_rot = uarm.readAngle(SERVO_ROT_NUM);
-    //    cur_left = uarm.readAngle(SERVO_LEFT_NUM);
-    //    cur_right = uarm.readAngle(SERVO_RIGHT_NUM);
-    //    cur_hand = uarm.readAngle(SERVO_HAND_ROT_NUM);
-    //    Serial.println("But really they were:");
-    //    show_angles(cur_rot, cur_left, cur_right, cur_hand);
-  }
-
-  // find target angles
-  double tgt_rot;
-  double tgt_left;
-  double tgt_right;
-  uarm.getCalAngles(x, y, z, tgt_rot, tgt_left, tgt_right);
-
-  if (duration == 0) {
-    uarm.writeAngle(tgt_rot, tgt_left, tgt_right, tgt_hand);  // moveToAtOnce
-  } else {
-
-    // interpolate 'em
-    double rot[INTERP_INTVLS];
-    double left[INTERP_INTVLS];
-    double right[INTERP_INTVLS];
-    double hand[INTERP_INTVLS];
-
-    interpolate(cur_rot, tgt_rot, 0, INTERP_INTVLS, rot, ease_type);
-    interpolate(cur_left, tgt_left, 0, INTERP_INTVLS, left, ease_type);
-    interpolate(cur_right, tgt_right, 0, INTERP_INTVLS, right, ease_type);
-    interpolate(cur_hand, tgt_hand, 0, INTERP_INTVLS, hand, ease_type);
-
-    execute_move(rot, left, right, hand, duration, false);
-    l_movementTrigger = 1;
-    uarm.writeAngle(tgt_rot, tgt_left, tgt_right, tgt_hand);
-  }
-  cur_rot = tgt_rot;
-  cur_left = tgt_left;
-  cur_right = tgt_right;
-  cur_hand = tgt_hand;
-  //uarm.detachAll(); NEVER detach without setting cur_angles_init to false
-}
-
-void uArm_Controller::execute_move(double (&rot)[INTERP_INTVLS], double (&left)[INTERP_INTVLS], double (&right)[INTERP_INTVLS], double (&hand)[INTERP_INTVLS], float duration, bool debug) {
-  if (!debug) {
-    uarm.attachAll();
-  }
-
-  for (byte i = 0; i < INTERP_INTVLS; i++)
-  {
-    if (!debug) {
-      l_movementTrigger = 1;
-      uarm.writeAngle(rot[i], left[i], right[i], hand[i]);
-      delay(duration * 1000 / INTERP_INTVLS);
-    } else {
-      show_angles(rot[i], left[i], right[i], hand[i]);
-    }
-  }
-}
-
-void uArm_Controller::interpolate(double start_val, double end_val, byte frame_start, byte frame_dur, double (&interp_val)[INTERP_INTVLS], byte type) {
-  double delta = end_val - start_val;
-  for (byte f = 0; f < frame_dur; f++) {
-    switch (type) {
-      case INTERP_LINEAR :
-        interp_val[frame_start + f] = delta * f / frame_dur + start_val;
-        break;
-      case INTERP_EASE_INOUT :
-        {
-          float t = f / (frame_dur / 2.0);
-          //Serial.println(t);
-          if (t < 1) {
-            interp_val[frame_start + f] = delta / 2 * t * t + start_val;
-          } else {
-            t--;
-            interp_val[frame_start + f] = -delta / 2 * (t * (t - 2) - 1) + start_val;
-          }
-        }
-        break;
-      case INTERP_EASE_IN :
-        {
-          float t = (float)f / frame_dur;
-          interp_val[frame_start + f] = delta * t * t + start_val;
-        }
-        break;
-      case INTERP_EASE_OUT :
-        {
-          float t = (float)f / frame_dur;
-          interp_val[frame_start + f] = -delta * t * (t - 2) + start_val;
-        }
-        break;
-    }
-  }
 }
 
