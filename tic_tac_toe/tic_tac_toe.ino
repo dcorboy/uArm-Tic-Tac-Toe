@@ -284,15 +284,3 @@ char get_mark(byte val) {
   }
 }
 
-//    if (readSerial == 'h') // Single Quote! This is a character.
-//    {
-//      digitalWrite(led, HIGH);
-//      Serial.print(" LED ON ");
-//    }
-//
-//    if (readSerial == 'l')
-//    {
-//      digitalWrite(led, LOW);
-//      Serial.print(" LED OFF");
-//    }
-
