@@ -2,12 +2,26 @@
 
 uArm Tic Tac Toe is an Arduino C++ sketch for the [uArm Metal](https://ufactory.cc/uarm/) robotic arm, allowing for completely autonomous play of tic-tac-toe.
 
+![uArm Tic-Tac-Toe](uArm-Tic-Tac-Toe.jpg?raw=true "uArm Tic-Tac-Toe")
+
 ## Motivation
 
+The goal for the robot is to play fully autonomously, like a human. This defines five major components I decided were needed to fulfill that goal.
+
+* **Understand the Game**  
+The robot must understand how the game is played and have some sense of a strategy for winning.
+* **Sense the Board**  
+The robot must be able to interpret the moves that the player makes and understand the positions of  the pieces on the board.
+* **Move the Pieces**  
+To robot must make its own moves at the appropriate times, using whichever marker has been assigned.
+* **Play Autonomously**  
+All the programming must reside within the robot itself and it should play without any connected computer or external signal.
+* **Convey Emotion**  
+This is a “stretch goal” to see if the robot can convey emotion to the player, based on the status of the game.
 
 ## Installation
 
-Tip runs against uArm-Developer/UArmForArduino@5b81537bcd8 so make sure that you have this library installed in your Arduino environment and that you have calibrated your uArm for use with the Arduino firmware.
+Tip runs against [uArm-Developer/UArmForArduino@5b81537](uArm-Developer/UArmForArduino@5b81537bcd8) so make sure that you have this library installed in your Arduino environment and that you have calibrated your uArm for use with the Arduino firmware.
 
 ## Comments
 
