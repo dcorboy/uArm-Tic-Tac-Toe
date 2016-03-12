@@ -33,6 +33,12 @@ I would like to document more fully later.
 
 More information on the project is available at [Cormerica Robot Tic-Tac-Toe](http://www.cormerica.com/robot-tic-tac-toe/)
 
+## Releases
+
+I thought this section was important given the hardware implications of the upcoming commits. SHA references are to [uArm-Developer/UArmForArduino](https://github.com/uArm-Developer/UArmForArduino)
+
+* **v1.0** uArm [b81537](https://github.com/uArm-Developer/UArmForArduino/commit/5b81537bcd81900fea62f8b81161c5e8a5b6bf5c) Plays in NO_PIXY mode over standard serial connection
+
 ## Files
 
 * **tic_tac_toe.ino** Game controller and debug/calibration menus. Moves are entered via the serial monitor if NO_PIXY.
