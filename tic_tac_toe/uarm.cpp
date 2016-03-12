@@ -44,8 +44,6 @@ void uArm_Controller::begin() {
   pinMode(BUZZER,   OUTPUT); digitalWrite(BUZZER,   LOW);
   pinMode(PUMP_EN,  OUTPUT); digitalWrite(PUMP_EN,  LOW);
   pinMode(VALVE_EN, OUTPUT); digitalWrite(VALVE_EN, LOW);
-  //digitalWrite(STOPPER, HIGH);  // in case of old Arduino
-  //wait wait, should this be INPUT_PULLUP?
   my_mark = 1;
 }
 

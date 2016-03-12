@@ -1,23 +1,29 @@
 // Test the proxying of PIXY data over a software serial connection
-// This has only been tested on a spare Arduino, NOT the uARM/
-// Works with another Arduino running SerialProxy
-// LIKE the uARM, it is set up to use uArm-available pins D8 and D9
+// This version is meant to be run on a uArm with a PIXY set up for UART communication
+// and connected to the uArm UART header
+
+// using the included SerialProxy sketch on another Arduino, connect pin D8 on the uArm to pin D2 on the proxy Arduino
+// and pind D9 on the uArm to pin D3 on the proxy Arduino
+// See Pixy block info via the proxy Arduino's serial port
 
 #include <SoftwareSerial.h>
-#include "myPixyUART.h"
+//#include "myPixyUART.h"
 
 SoftwareSerial proxySerial(9, 8);  // Rx, Tx
-PixyUART pixy;
+//PixyUART pixy;
 
 void setup()
 {
   proxySerial.begin(9600); // 9600 baud for the proxy *console* (not for the UART connected to Pixy)
   proxySerial.print("Starting...\n");
-  pixy.init();
+  //pixy.init();
 }
 
-void loop()
-{
+void loop() {
+#if 1
+  proxySerial.print("Test\n");
+  delay(1000);
+#else
   static int i = 0;
   int j;
   uint16_t blocks;
@@ -44,5 +50,6 @@ void loop()
         proxySerial.print(pbuf);
       }
     }
-  }  
+  }
+#endif
 }
