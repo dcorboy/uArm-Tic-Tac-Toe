@@ -21,7 +21,7 @@ This is a “stretch goal” to see if the robot can convey emotion to the playe
 
 ## Installation
 
-Tip runs against [uArm-Developer/UArmForArduino@5b81537](uArm-Developer/UArmForArduino@5b81537bcd8) so make sure that you have this library installed in your Arduino environment and that you have calibrated your uArm for use with the Arduino firmware.
+The tip runs against [uArm-Developer/UArmForArduino:commit:5b81537](https://github.com/uArm-Developer/UArmForArduino/commit/5b81537bcd81900fea62f8b81161c5e8a5b6bf5c) so make sure that you have this library installed in your Arduino environment and that you have calibrated your uArm for use with the Arduino firmware.
 
 ## Comments
 
