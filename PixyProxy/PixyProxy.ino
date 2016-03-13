@@ -7,23 +7,19 @@
 // See Pixy block info via the proxy Arduino's serial port
 
 #include <SoftwareSerial.h>
-//#include "myPixyUART.h"
+#include "myPixyUART.h"
 
 SoftwareSerial proxySerial(9, 8);  // Rx, Tx
-//PixyUART pixy;
+PixyUART pixy;
 
 void setup()
 {
   proxySerial.begin(9600); // 9600 baud for the proxy *console* (not for the UART connected to Pixy)
   proxySerial.print("Starting...\n");
-  //pixy.init();
+  pixy.init();
 }
 
 void loop() {
-#if 1
-  proxySerial.print("Test\n");
-  delay(1000);
-#else
   static int i = 0;
   int j;
   uint16_t blocks;
@@ -51,5 +47,4 @@ void loop() {
       }
     }
   }
-#endif
 }
