@@ -160,9 +160,12 @@ void uArm_Controller::move_marker(double init_x, double init_y, double init_z, d
   //  Serial.print("End Rot: ");
   //  Serial.println(end_rot);
   move_to(init_x, init_y, init_z, start_rot, 1);              // move to the initial position
+    // uarm.moveToOpts(init_x, init_y, init_z, 0, F_HAND_ROT_REL, 1, PATH_ANGLES, INTERP_EASE_INOUT);
   pickup_drop(true, init_x, init_y, init_z, start_rot);               // move end-effector downwards until stopper hits something, then pick it up
   move_to(WAIT_X, WAIT_Y, init_z, hand_offset(0), 1);              // move to a common central position
+    // uarm.moveToOpts(WAIT_X, WAIT_Y, init_z, 0, F_HAND_ROT_REL, 1, PATH_ANGLES, INTERP_EASE_INOUT);
   move_to(dest_x, dest_y, dest_z, end_rot, 1);              // move to the destination position
+    // uarm.moveToOpts(dest_x, dest_y, dest_z, 0, F_HAND_ROT_REL, 1, PATH_ANGLES, INTERP_EASE_INOUT);
   pickup_drop(false, dest_x, dest_y, dest_z, end_rot);  // move end-effector downwards until stopper hits something, then drop it
 }
 
@@ -174,6 +177,7 @@ void uArm_Controller::pickup_drop(bool pickup, double current_x, double current_
       if (stopper == HIGH) { // if we haven't yet, move downwards a bit at a time
         current_z = current_z - .5;  // move downwards (too slow will not depress the limit switch)
         move_to(current_x, current_y, current_z, tgt_rotation, 0);  // a moveToAtOnce
+          // uarm.moveToOpts(current_x, current_y, current_z, 0, F_HAND_RELATIVE, 0, PATH_ANGLES, INTERP_EASE_INOUT);
         delay(100);
       } else {
         Serial.println("stopper hit!");
@@ -181,6 +185,7 @@ void uArm_Controller::pickup_drop(bool pickup, double current_x, double current_
     }
   } else {  // dropping
     move_to(current_x, current_y, DROP_HGT, tgt_rotation, .5);
+      // uarm.moveToOpts(current_x, current_y, DROP_HGT, 0, F_HAND_RELATIVE, .5, PATH_ANGLES, INTERP_EASE_INOUT);
   }
 
   // at this point, the stopper is depressed so we can pickup or release via the pump

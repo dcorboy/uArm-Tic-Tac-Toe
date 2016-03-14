@@ -26,7 +26,8 @@
 #define DEBUG         7
 #define PICKUP_TESTS  8
 #define RAW_VALUES    9
-#define CALIBRATE    10
+#define CAMERA       10
+#define CALIBRATE    11
 
 GameBoard board;
 GameLogic logic(&board);
@@ -35,6 +36,8 @@ uArm_Controller uarm_ctrl;
 
 byte state;
 byte player_mark;
+int wait_y = -21;
+int wait_z = 20;
 
 void setup() {
   Wire.begin();        // join i2c bus (address optional for master)
@@ -130,7 +133,7 @@ void loop() {
       } else if (input == 'v') {
         change_state(RAW_VALUES);
       } else if (input == 'c') {
-        change_state(CALIBRATE);
+        change_state(CAMERA);
       } else if (input != NO_VAL) {
         byte num = input - '0';
         if (num >= 1 && num <= 9) {
@@ -173,17 +176,39 @@ void loop() {
         Serial.println(F("Mark set to 'O'"));
       } else if (input == 't') {
         uarm_ctrl.show_board_position(WAIT_POS);
-        uarm_ctrl.move_marker(-14, -21, 10, -14, -21, 10);
         delay(1000);
+        uarm_ctrl.move_marker(-15, -15, 10, 7, -28, 10);
         uarm_ctrl.show_board_position(WAIT_POS);
-        uarm_ctrl.move_marker(14, -21, 10, 14, -21, 10);
+        delay(1000);
+        uarm_ctrl.move_marker(15, -14, 10, -7, -28, 10);
+        uarm_ctrl.show_board_position(WAIT_POS);
       } else if (input != NO_VAL) {
         byte num = input - '0';
         if (num >= 1 && num <= 9) {
           uarm_ctrl.show_board_position(WAIT_POS);
           delay(1000);
           uarm_ctrl.make_move(num - 1);
+          uarm_ctrl.show_board_position(WAIT_POS);
         }
+      }
+      break;
+    case CAMERA :
+      if (input == 'q') {
+        change_state(DEBUG);
+      } else if (input == 'u') {
+        uarm_ctrl.move_to(0, wait_y, ++wait_z, 90, .5);
+        show_wait();
+      } else if (input == 'd') {
+        uarm_ctrl.move_to(0, wait_y, --wait_z, 90, .5);
+        show_wait();
+      } else if (input == 'i') {
+        uarm_ctrl.move_to(0, ++wait_y, wait_z, 90, .5);
+        show_wait();
+      } else if (input == 'o') {
+        uarm_ctrl.move_to(0, --wait_y, wait_z, 90, .5);
+        show_wait();
+      } else if (input == 'c') {
+        change_state(CALIBRATE);
       }
       break;
     case RAW_VALUES :
@@ -193,10 +218,16 @@ void loop() {
       break;
     case CALIBRATE :
         if (sensor.calibrate()) {
-          change_state(DEBUG);
+          change_state(CAMERA);
         }
       break;
   }
+}
+
+void show_wait() {
+  char buf[64];
+  sprintf(buf, "Current Wait -- Y: %i, Z: %i\n", wait_y, wait_z);
+  Serial.print(buf);
 }
 
 void start_game(bool player_first) {
@@ -245,11 +276,16 @@ void change_state(byte new_state) {
     case DEBUG :
       Serial.println(F("(R)eset, (D)ecode board, (S)table board, Board Positions (1-9)"));
       Serial.println(F("(X)-Markers, (O)-Markers, (W)ait position, Current (L)ocation"));
-      Serial.println(F("(P)ickup tests, Raw (V)alues, (C)alibrate or (Q)uit"));
+      Serial.println(F("(P)ickup tests, Raw (V)alues, (C)amera or (Q)uit"));
       break;
     case PICKUP_TESTS :
       Serial.println(F("(X) marker, (Y) marker, Move to (1-9)"));
       Serial.println(F("Rotate (T)est, Limit (S)witch or (Q)uit"));
+      break;
+    case CAMERA :
+      Serial.println(F("(U)p, (D)own, (O)ut, (I)n, (C)alibrate or (Q)uit"));
+      uarm_ctrl.move_to(0, wait_y, wait_z, 90, 1);
+      show_wait();
       break;
   }
   state = new_state;
