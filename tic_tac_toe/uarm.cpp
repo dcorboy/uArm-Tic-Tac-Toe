@@ -75,14 +75,14 @@ void uArm_Controller::new_game(bool play_first) {
 }
 
 void uArm_Controller::make_move(byte posn) {
-  Serial.print(F("Move to position: "));
-  Serial.print(posn);
-  Serial.print(F(" -- X: "));
-  Serial.print(board_positions[posn][0]);
-  Serial.print(F(", Y: "));
-  Serial.print(board_positions[posn][1]);
-  Serial.print(F(", Z: "));
-  Serial.println(BOARD_HGT);
+  ttt_serial.print(F("Move to position: "));
+  ttt_serial.print(posn);
+  ttt_serial.print(F(" -- X: "));
+  ttt_serial.print(board_positions[posn][0]);
+  ttt_serial.print(F(", Y: "));
+  ttt_serial.print(board_positions[posn][1]);
+  ttt_serial.print(F(", Z: "));
+  ttt_serial.println(BOARD_HGT);
   move_marker(my_mark == 1 ? X_MARKER_X : O_MARKER_X, my_mark == 1 ? X_MARKER_Y : O_MARKER_Y, MARKER_HGT, board_positions[posn][0], board_positions[posn][1], BOARD_HGT);
 }
 
@@ -107,14 +107,14 @@ void uArm_Controller::show_board_position(byte posn) {
     y = WAIT_Y;
     z = WAIT_Z;
   }
-  Serial.print(F("Move to position: "));
-  Serial.print(posn);
-  Serial.print(F(" -- X: "));
-  Serial.print(x);
-  Serial.print(F(", Y: "));
-  Serial.print(y);
-  Serial.print(F(", Z: "));
-  Serial.println(z);
+  ttt_serial.print(F("Move to position: "));
+  ttt_serial.print(posn);
+  ttt_serial.print(F(" -- X: "));
+  ttt_serial.print(x);
+  ttt_serial.print(F(", Y: "));
+  ttt_serial.print(y);
+  ttt_serial.print(F(", Z: "));
+  ttt_serial.println(z);
   move_to(x, y, z, hand_offset(0), 1);
 }
 
@@ -124,21 +124,21 @@ void uArm_Controller::show_xyz() {
   double z;
 
   uarm.getCalXYZ(x, y, z);
-  Serial.print("Curr: ");
-  Serial.print(x);
-  Serial.print(", ");
-  Serial.print(y);
-  Serial.print(", ");
-  Serial.println(z);
+  ttt_serial.print(F("Curr: "));
+  ttt_serial.print(x);
+  ttt_serial.print(F(", "));
+  ttt_serial.print(y);
+  ttt_serial.print(F(", "));
+  ttt_serial.println(z);
 
-  Serial.print(F("Rot: "));
-  Serial.println(uarm.readAngle(SERVO_ROT_NUM));
-  Serial.print(F("Left: "));
-  Serial.println(uarm.readAngle(SERVO_LEFT_NUM));
-  Serial.print(F("Right: "));
-  Serial.println(uarm.readAngle(SERVO_RIGHT_NUM));
-  Serial.print(F("Hand: "));
-  Serial.println(uarm.readAngle(SERVO_HAND_ROT_NUM));
+  ttt_serial.print(F("Rot: "));
+  ttt_serial.println(uarm.readAngle(SERVO_ROT_NUM));
+  ttt_serial.print(F("Left: "));
+  ttt_serial.println(uarm.readAngle(SERVO_LEFT_NUM));
+  ttt_serial.print(F("Right: "));
+  ttt_serial.println(uarm.readAngle(SERVO_RIGHT_NUM));
+  ttt_serial.print(F("Hand: "));
+  ttt_serial.println(uarm.readAngle(SERVO_HAND_ROT_NUM));
 }
 
 // private members
@@ -155,10 +155,10 @@ void uArm_Controller::move_wait_position() {
 void uArm_Controller::move_marker(double init_x, double init_y, double init_z, double dest_x, double dest_y, double dest_z) {
   int start_rot = hand_offset(-round(atan(init_x / init_y) * 180.0 / MATH_PI * 0.85));
   int end_rot = hand_offset(-round(atan(dest_x / dest_y) * 180.0 / MATH_PI * 0.85));
-  //  Serial.print("Start Rot: ");
-  //  Serial.println(start_rot);
-  //  Serial.print("End Rot: ");
-  //  Serial.println(end_rot);
+  //  ttt_serial.print("Start Rot: ");
+  //  ttt_serial.println(start_rot);
+  //  ttt_serial.print("End Rot: ");
+  //  ttt_serial.println(end_rot);
   move_to(init_x, init_y, init_z, start_rot, 1);              // move to the initial position
     // uarm.moveToOpts(init_x, init_y, init_z, 0, F_HAND_ROT_REL, 1, PATH_ANGLES, INTERP_EASE_INOUT);
   pickup_drop(true, init_x, init_y, init_z, start_rot);               // move end-effector downwards until stopper hits something, then pick it up
@@ -180,7 +180,7 @@ void uArm_Controller::pickup_drop(bool pickup, double current_x, double current_
           // uarm.moveToOpts(current_x, current_y, current_z, 0, F_HAND_RELATIVE, 0, PATH_ANGLES, INTERP_EASE_INOUT);
         delay(100);
       } else {
-        Serial.println("stopper hit!");
+        ttt_serial.println(F("stopper hit!"));
       }
     }
   } else {  // dropping
@@ -216,13 +216,13 @@ void uArm_Controller::postgame(byte winner) {
 
 
 void uArm_Controller::show_angles(double theta_1, double theta_2, double theta_3, double hand_angle) {
-  Serial.print(F("Rot: "));
-  Serial.println(theta_1);
-  Serial.print(F("Left: "));
-  Serial.println(theta_2);
-  Serial.print(F("Right: "));
-  Serial.println(theta_3);
-  Serial.print(F("Hand: "));
-  Serial.println(hand_angle);
+  ttt_serial.print(F("Rot: "));
+  ttt_serial.println(theta_1);
+  ttt_serial.print(F("Left: "));
+  ttt_serial.println(theta_2);
+  ttt_serial.print(F("Right: "));
+  ttt_serial.println(theta_3);
+  ttt_serial.print(F("Hand: "));
+  ttt_serial.println(hand_angle);
 }
 

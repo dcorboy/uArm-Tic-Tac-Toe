@@ -2,6 +2,7 @@
 
 #include <arduino.h>
 #include "gameboard.h"
+#include "ttt_serial.h"
 #include <SPI.h>
 //#ifndef NO_PIXY
 #include <Pixy.h>

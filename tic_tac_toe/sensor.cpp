@@ -48,14 +48,14 @@ byte Sensor::detect_player_move() {
   if (valid_board(board)) {
     if (board_count(board) == game_board->get_turn() + 1) {
       byte move_pos = diff_game_board(board);
-      Serial.println(F("Someone made a move?"));
+      ttt_serial.println(F("Someone made a move?"));
       if (move_pos != NO_VAL && board[move_pos] == player_mark) {
         return move_pos;
       }
     } else {
-      Serial.print(board_count(board));
-      Serial.print(" vs. ");
-      Serial.println(game_board->get_turn() + 1);
+      ttt_serial.print(board_count(board));
+      ttt_serial.print(F(" vs. "));
+      ttt_serial.println(game_board->get_turn() + 1);
     }
   }
   return NO_VAL;
@@ -82,7 +82,7 @@ bool Sensor::show_raw_values(){
 byte *Sensor::valid_board(byte board[]) {
   if (check_board(board)) {
     if (boards_equal(board, cached_board)) {
-      //Serial.println(stable_hold);
+      //ttt_serial.println(stable_hold);
       if (++stable_hold >= STABLE_HOLD) {
         stable_hold = 0;
         return board;
@@ -98,7 +98,7 @@ byte *Sensor::valid_board(byte board[]) {
 // returns a board after an appropriate amount of time, otherwise NULL
 byte *Sensor::check_board(byte board[]) {
   uint16_t object_cnt = pixy.getBlocks();
-  //Serial.println(object_cnt);
+  //ttt_serial.println(object_cnt);
   if (object_cnt > 0) {
     frame_hold++;
     //blank_hold = 0;
@@ -112,7 +112,7 @@ byte *Sensor::check_board(byte board[]) {
     //      decode_board(board, object_cnt);
     //      blank_hold = 0;
     //      return board;
-    //    } else {Serial.println(blank_hold);}
+    //    } else {ttt_serial.println(blank_hold);}
   }
   return NULL;
 }
@@ -133,12 +133,12 @@ byte *Sensor::decode_board(byte board[], uint16_t object_cnt) {
       if (xpos > left && xpos < right && ypos > top && ypos < bottom) { // filter blocks outside the board
         decode_block(board, pixy.blocks[j]);
       } else {
-        // Serial.print("Outside board: ");
+        // ttt_serial.print("Outside board: ");
         // pixy.blocks[j].print();
       }
     }
   } else {
-    Serial.println(F("No objects"));
+    ttt_serial.println(F("No objects"));
   }
   return board;
 }
@@ -171,7 +171,7 @@ byte Sensor::pos_covered(Block block, byte results[9]) {
 
   char buf[64];
   //sprintf(buf, "Block %2d:  top: %3d left: %3d bot: %3d rgt: %3d\n", block.signature, block_top, block_left, block_bottom, block_right);
-  //Serial.print(buf);
+  //ttt_serial.print(buf);
 
   int vsixth = (right - left) / 6;
   int hsixth = (bottom - top) / 6;
@@ -185,9 +185,9 @@ byte Sensor::pos_covered(Block block, byte results[9]) {
 
   if (!shown) {
     //sprintf(buf, "left %3d: middle: %3d right: %3d\n", p_left, p_hmiddle, p_right);
-    //Serial.print(buf);
+    //ttt_serial.print(buf);
     //sprintf(buf, "top %3d: middle: %3d bottom: %3d\n", p_top, p_vmiddle, p_bottom);
-    //Serial.print(buf);
+    //ttt_serial.print(buf);
     shown = true;
   }
 
@@ -227,8 +227,8 @@ byte Sensor::pos_covered(Block block, byte results[9]) {
     }
   }
   if (count <= 3) {
-    //Serial.print("This block covers: ");
-    //Serial.println(count);
+    //ttt_serial.print("This block covers: ");
+    //ttt_serial.println(count);
     return count;
   } else {
     return 0;
@@ -251,7 +251,7 @@ bool Sensor::calibrate() {
             found++;
             char buf[64];
             sprintf(buf, "Found top: %3d  left: %3d\n", top, left);
-            Serial.print(buf);
+            ttt_serial.print(buf);
           } else if (pixy.blocks[i].signature == 2 && pixy.blocks[i].x > CALIB_CENTER_X && pixy.blocks[i].y > CALIB_CENTER_Y) {
             // if there's an O in the bottom-right that is big enough, we get here
             bottom = pixy.blocks[i].y + (pixy.blocks[i].height / 2);
@@ -259,7 +259,7 @@ bool Sensor::calibrate() {
             found++;
             char buf[64];
             sprintf(buf, "Found bottom: %3d  right: %3d\n", bottom, right);
-            Serial.print(buf);
+            ttt_serial.print(buf);
           }
         }
       }
@@ -277,7 +277,7 @@ bool Sensor::show_raw_values() {
       char buf[64];
       for (int i = 0; i < object_cnt; i++) {
         sprintf(buf, "Block %2d:  x: %3d y: %3d -- wid: %3d hgt: %3d\n", pixy.blocks[i].signature, pixy.blocks[i].x, pixy.blocks[i].y, pixy.blocks[i].width, pixy.blocks[i].height);
-        Serial.print(buf);
+        ttt_serial.print(buf);
       }
       return true;
     }
@@ -287,9 +287,9 @@ bool Sensor::show_raw_values() {
 #endif
 
 bool Sensor::boards_equal(byte board_a[], byte board_b[]) {
-  Serial.print(board_count(board_a));
-  Serial.print(F(" vs. "));
-  Serial.println(board_count(board_b));
+  ttt_serial.print(board_count(board_a));
+  ttt_serial.print(F(" vs. "));
+  ttt_serial.println(board_count(board_b));
   for (int i = 0; i < 9; i++) {
     if (board_a[i] != board_b[i]) {
       return false;
@@ -334,11 +334,11 @@ byte Sensor::diff_game_board(byte board[]) {
 
 // {
 //    sprintf(buf, "Detected %d:\n", object_cnt);
-//    Serial.print(buf);
+//    ttt_serial.print(buf);
 //    for (int j = 0; j < object_cnt; j++)
 //    {
 //      sprintf(buf, "  block %d: ", j);
-//      Serial.print(buf);
+//      ttt_serial.print(buf);
 //
 //      if (pixy.blocks[j].y < 67) {
 //        pos = 0;
@@ -354,7 +354,7 @@ byte Sensor::diff_game_board(byte board[]) {
 //        pos += 1;
 //      }
 //      sprintf(buf, "  %c mark in position %d: ", pixy.blocks[j].signature == 1 ? 'X' : 'O', pos);
-//      Serial.print(buf);
+//      ttt_serial.print(buf);
 //      pixy.blocks[j].print();
 //    }
 //

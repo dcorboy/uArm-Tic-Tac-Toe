@@ -6,6 +6,7 @@
   //#include <linreg.h>
 //#include <uarm_calibration.h>
   #include <uarm_library.h>
+  #include "ttt_serial.h"
 #endif
 
 #ifndef uArm_Controller_h
@@ -22,15 +23,6 @@
 #endif
 
 #define NO_VAL 255
-
-// interpolation intervals
-#define INTERP_INTVLS 50
-
-// interpolation types
-#define INTERP_LINEAR      0
-#define INTERP_EASE_INOUT  1
-#define INTERP_EASE_IN     2
-#define INTERP_EASE_OUT    3
 
 // position definitions
 #define TOP_ROW    -14
@@ -51,8 +43,8 @@
 #define DROP_HGT     6.5
 
 #define WAIT_X       0
-#define WAIT_Y       -21
-#define WAIT_Z       20
+#define WAIT_Y       -14
+#define WAIT_Z       23
 
 // these pseudo positions indicate the two marker stacks and the wait (sensor) position
 #define X_MARKER_POS 9
@@ -107,10 +99,6 @@ class uArm_Controller {
     void show_angles(double theta_1, double theta_2, double theta_3, double hand_angle);
     void pickup_drop(bool pickup, double current_x, double current_y, double current_z, int tgt_rotation);
 };
-
-extern bool g_always_init;
-extern bool g_orig_move;
-extern bool g_no_rotate;
 
 #endif
 

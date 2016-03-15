@@ -8,13 +8,11 @@
   Copyright(C) 2015 Dave Corboy. All right reserved.
 *******************************************************************************************/
 
-//#include <EEPROM.h>
-#include <Wire.h>
-#include <Servo.h>
 #include "gameboard.h"
 #include "gamelogic.h"
 #include "sensor.h"
 #include "uarm.h"
+#include "ttt_serial.h"
 
 #define WAIT_READY    0   // the game control states
 #define WAIT_START    1
@@ -36,12 +34,12 @@ uArm_Controller uarm_ctrl;
 
 byte state;
 byte player_mark;
-int wait_y = -21;
-int wait_z = 20;
+int wait_y = -14;
+int wait_z = 23;
 
 void setup() {
-  Wire.begin();        // join i2c bus (address optional for master)
-  Serial.begin(9600);  // start serial port at 9600 bps
+  //Wire.begin();        // join i2c bus (address optional for master)
+  ttt_serial.begin();  // start serial port at 9600 bps
   sensor.begin();
   uarm_ctrl.begin();
   delay(500);
@@ -52,8 +50,8 @@ void setup() {
 void loop() {
   byte move;
   byte input = NO_VAL;
-  if (Serial.available() > 0) {
-    input = Serial.read();
+  if (ttt_serial.available() > 0) {
+    input = ttt_serial.read();
   }
   switch (state) {
     case WAIT_READY :
@@ -72,7 +70,7 @@ void loop() {
           } else if (input == 's') {
             player_first = false;
           }
-          Serial.println(F("Starting game"));
+          ttt_serial.println(F("Starting game"));
           start_game(player_first);
         }
       }
@@ -86,14 +84,14 @@ void loop() {
             if (board.valid_move(num - 1)) {
               move = num - 1;
             } else {
-              Serial.println(F("Move is not valid"));
+              ttt_serial.println(F("Move is not valid"));
             }
           }
         }
         if (move != NO_VAL) {
           board.set_posn(move);
-          Serial.print(F("Player moves to: "));
-          Serial.println(move + 1);
+          ttt_serial.print(F("Player moves to: "));
+          ttt_serial.println(move + 1);
           change_state(board.game_over() ? POSTGAME : UARM_TURN);
         } else if (input == 'q') {
           change_state(POSTGAME);
@@ -103,8 +101,8 @@ void loop() {
     case UARM_TURN :
       move = logic.do_move();
       board.set_posn(move);
-      Serial.print(F("UArm moves to: "));
-      Serial.println(move + 1);
+      ttt_serial.print(F("UArm moves to: "));
+      ttt_serial.println(move + 1);
       uarm_ctrl.make_move(move);
       change_state(board.game_over() ? POSTGAME : PLAYER_TURN);
       break;
@@ -122,16 +120,10 @@ void loop() {
         uarm_ctrl.show_board_position(O_MARKER_POS);
       } else if (input == 'w') {
         uarm_ctrl.show_board_position(WAIT_POS);
-      } else if (input == 'd') {
-        change_state(DECODE_BOARD);
-      } else if (input == 's') {
-        change_state(STABLE_BOARD);
       } else if (input == 'l') {
         uarm_ctrl.show_xyz();
       } else if (input == 'p') {
         change_state(PICKUP_TESTS);
-      } else if (input == 'v') {
-        change_state(RAW_VALUES);
       } else if (input == 'c') {
         change_state(CAMERA);
       } else if (input != NO_VAL) {
@@ -141,39 +133,21 @@ void loop() {
         }
       }
       break;
-    case DECODE_BOARD :
-      {
-        byte board[9];
-        if (sensor.check_board(board)) {
-          print_board(board);
-          change_state(DEBUG);
-        }
-      }
-      break;
-    case STABLE_BOARD :
-      {
-        byte board[9];
-        if (sensor.valid_board(board)) {
-          print_board(board);
-          change_state(DEBUG);
-        }
-      }
-      break;
     case PICKUP_TESTS :
       if (input == 'q') {
         change_state(DEBUG);
       } else if (input == 's') {
         if (digitalRead(STOPPER) == HIGH) {
-          Serial.println(F("HIGH"));
+          ttt_serial.println(F("HIGH"));
         } else {
-          Serial.println(F("LOW"));
+          ttt_serial.println(F("LOW"));
         }
       } else if (input == 'x') {
         uarm_ctrl.set_marker(1);
-        Serial.println(F("Mark set to 'X'"));
+        ttt_serial.println(F("Mark set to 'X'"));
       } else if (input == 'o') {
         uarm_ctrl.set_marker(2);
-        Serial.println(F("Mark set to 'O'"));
+        ttt_serial.println(F("Mark set to 'O'"));
       } else if (input == 't') {
         uarm_ctrl.show_board_position(WAIT_POS);
         delay(1000);
@@ -195,10 +169,16 @@ void loop() {
     case CAMERA :
       if (input == 'q') {
         change_state(DEBUG);
-      } else if (input == 'u') {
+      } else if (input == 'd') {
+        change_state(DECODE_BOARD);
+      } else if (input == 's') {
+        change_state(STABLE_BOARD);
+      } else if (input == 'v') {
+        change_state(RAW_VALUES);
+      } else if (input == 'r') {
         uarm_ctrl.move_to(0, wait_y, ++wait_z, 90, .5);
         show_wait();
-      } else if (input == 'd') {
+      } else if (input == 'l') {
         uarm_ctrl.move_to(0, wait_y, --wait_z, 90, .5);
         show_wait();
       } else if (input == 'i') {
@@ -211,9 +191,27 @@ void loop() {
         change_state(CALIBRATE);
       }
       break;
+    case DECODE_BOARD :
+      {
+        byte board[9];
+        if (sensor.check_board(board)) {
+          print_board(board);
+          change_state(CAMERA);
+        }
+      }
+      break;
+    case STABLE_BOARD :
+      {
+        byte board[9];
+        if (sensor.valid_board(board)) {
+          print_board(board);
+          change_state(CAMERA);
+        }
+      }
+      break;
     case RAW_VALUES :
         if (sensor.show_raw_values()) {
-          change_state(DEBUG);
+          change_state(CAMERA);
         }
       break;
     case CALIBRATE :
@@ -227,15 +225,15 @@ void loop() {
 void show_wait() {
   char buf[64];
   sprintf(buf, "Current Wait -- Y: %i, Z: %i\n", wait_y, wait_z);
-  Serial.print(buf);
+  ttt_serial.print(buf);
 }
 
 void start_game(bool player_first) {
-  //Serial.println(F("The game has almost begun"));
+  //ttt_serial.println(F("The game has almost begun"));
   logic.new_game(!player_first, MODE_EASY);
   uarm_ctrl.new_game(!player_first);
   player_mark = player_first ? 1 : 2;
-  Serial.println(F("The game has begun"));
+  ttt_serial.println(F("The game has begun"));
   change_state(player_first ? PLAYER_TURN : UARM_TURN);
 }
 
@@ -244,17 +242,17 @@ void change_state(byte new_state) {
     case WAIT_READY :
       board.reset();
       sensor.reset();
-      Serial.println(F("Waiting for board to be (R)eady... (or (D)ebug)"));
+      ttt_serial.println(F("Waiting for board to be (R)eady... (or (D)ebug)"));
       uarm_ctrl.wait_ready();
       uarm_ctrl.alert(2);
       break;
     case WAIT_START :
-      Serial.println(F("Waiting for you to go (F)irst, unless you want to go (S)econd"));
+      ttt_serial.println(F("Waiting for you to go (F)irst, unless you want to go (S)econd"));
       uarm_ctrl.wait_start();
       break;
     case PLAYER_TURN :
       uarm_ctrl.wait_player();
-      Serial.println(F("Waiting for player move (or 1..9)"));
+      ttt_serial.println(F("Waiting for player move (or 1..9)"));
       print_board(board.get_board());
       break;
     case UARM_TURN :
@@ -262,28 +260,29 @@ void change_state(byte new_state) {
     case POSTGAME :
       {
         byte winner = board.winner();
-        Serial.println(F("The game is over  (S)kip"));
+        ttt_serial.println(F("The game is over  (S)kip"));
         print_board(board.get_board());
         if (winner != 0) {
-          Serial.print(winner == player_mark ? F("Player") : F("uArm"));
-          Serial.println(F(" is the winner!"));
+          ttt_serial.print(winner == player_mark ? F("Player") : F("uArm"));
+          ttt_serial.println(F(" is the winner!"));
         } else {
-          Serial.println(F("The game is a draw..."));
+          ttt_serial.println(F("The game is a draw..."));
         }
         uarm_ctrl.postgame(winner);
         break;
       }
     case DEBUG :
-      Serial.println(F("(R)eset, (D)ecode board, (S)table board, Board Positions (1-9)"));
-      Serial.println(F("(X)-Markers, (O)-Markers, (W)ait position, Current (L)ocation"));
-      Serial.println(F("(P)ickup tests, Raw (V)alues, (C)amera or (Q)uit"));
+      ttt_serial.println(F("Board Positions (1-9)"));
+      ttt_serial.println(F("(X)-Markers, (O)-Markers, (W)ait position, Current (L)ocation"));
+      ttt_serial.println(F("(P)ickup tests, (C)amera or (Q)uit"));
       break;
     case PICKUP_TESTS :
-      Serial.println(F("(X) marker, (Y) marker, Move to (1-9)"));
-      Serial.println(F("Rotate (T)est, Limit (S)witch or (Q)uit"));
+      ttt_serial.println(F("(X) marker, (Y) marker, Move to (1-9)"));
+      ttt_serial.println(F("Rotate (T)est, Limit (S)witch or (Q)uit"));
       break;
     case CAMERA :
-      Serial.println(F("(U)p, (D)own, (O)ut, (I)n, (C)alibrate or (Q)uit"));
+      ttt_serial.println(F("(D)ecode board, (S)table board, Raw (V)alues"));
+      ttt_serial.println(F("(R)aise, (L)ower, (O)ut, (I)n, (C)alibrate or (Q)uit"));
       uarm_ctrl.move_to(0, wait_y, wait_z, 90, 1);
       show_wait();
       break;
@@ -294,13 +293,13 @@ void change_state(byte new_state) {
 void print_board(byte board[]) {
   char buf[32];
   sprintf(buf, "  %c | %c | %c\n", get_mark(board[0]), get_mark(board[1]), get_mark(board[2]));
-  Serial.print(buf);
-  Serial.println(" -----------");
+  ttt_serial.print(buf);
+  ttt_serial.println(" -----------");
   sprintf(buf, "  %c | %c | %c\n", get_mark(board[3]), get_mark(board[4]), get_mark(board[5]));
-  Serial.print(buf);
-  Serial.println(" -----------");
+  ttt_serial.print(buf);
+  ttt_serial.println(" -----------");
   sprintf(buf, "  %c | %c | %c\n", get_mark(board[6]), get_mark(board[7]), get_mark(board[8]));
-  Serial.print(buf);
+  ttt_serial.print(buf);
 }
 
 char get_mark(byte val) {
