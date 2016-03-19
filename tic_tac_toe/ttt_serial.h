@@ -8,8 +8,8 @@
 
 #define UART_BAUD   9600
 #define SOFTW_BAUD  9600
-#define TX_PIN      8
-#define RX_PIN      9
+#define TX_PIN      9
+#define RX_PIN      8
 
 class TTT_Serial {
   public:

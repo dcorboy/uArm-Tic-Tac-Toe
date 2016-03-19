@@ -71,7 +71,7 @@ class uArm_Controller {
     void show_board_position(byte posn);
     void show_xyz();
     void move_marker(double init_x, double init_y, double init_z, double dest_x, double dest_y, double dest_z);
-    void move_to(double x, double y, double z, double hand_angle, float duration) { uarm.moveToOpts(x, y, z, hand_angle, F_ABSOLUTE, duration, PATH_ANGLES, INTERP_EASE_INOUT); }
+    void debug_move_to(double x, double y, double z, double hand_angle, float duration) { move_to(x, y, z, hand_angle, duration); debug_detach(); }
     void set_marker(byte mark) { my_mark = mark; }
     // ^^ DEBUG only move_marker SHOULD BE PRIVATE
 
@@ -95,9 +95,10 @@ class uArm_Controller {
       {RGT_COL, BOT_ROW}
     };
 
+    void move_to(double x, double y, double z, double hand_angle, float duration) { uarm.moveToOpts(x, y, z, hand_angle, F_ABSOLUTE, duration, PATH_ANGLES, INTERP_EASE_INOUT); }
     void move_wait_position();
-    void show_angles(double theta_1, double theta_2, double theta_3, double hand_angle);
     void pickup_drop(bool pickup, double current_x, double current_y, double current_z, int tgt_rotation);
+    void debug_detach();
 };
 
 #endif

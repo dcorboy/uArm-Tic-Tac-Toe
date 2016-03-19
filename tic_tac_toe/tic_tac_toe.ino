@@ -176,16 +176,16 @@ void loop() {
       } else if (input == 'v') {
         change_state(RAW_VALUES);
       } else if (input == 'r') {
-        uarm_ctrl.move_to(0, wait_y, ++wait_z, 90, .5);
+        uarm_ctrl.debug_move_to(0, wait_y, ++wait_z, 90, .5);
         show_wait();
       } else if (input == 'l') {
-        uarm_ctrl.move_to(0, wait_y, --wait_z, 90, .5);
+        uarm_ctrl.debug_move_to(0, wait_y, --wait_z, 90, .5);
         show_wait();
       } else if (input == 'i') {
-        uarm_ctrl.move_to(0, ++wait_y, wait_z, 90, .5);
+        uarm_ctrl.debug_move_to(0, ++wait_y, wait_z, 90, .5);
         show_wait();
       } else if (input == 'o') {
-        uarm_ctrl.move_to(0, --wait_y, wait_z, 90, .5);
+        uarm_ctrl.debug_move_to(0, --wait_y, wait_z, 90, .5);
         show_wait();
       } else if (input == 'c') {
         change_state(CALIBRATE);
@@ -237,18 +237,19 @@ void start_game(bool player_first) {
   change_state(player_first ? PLAYER_TURN : UARM_TURN);
 }
 
+//
 void change_state(byte new_state) {
   switch (new_state) {
     case WAIT_READY :
       board.reset();
       sensor.reset();
-      ttt_serial.println(F("Waiting for board to be (R)eady... (or (D)ebug)"));
       uarm_ctrl.wait_ready();
       uarm_ctrl.alert(2);
+      ttt_serial.println(F("Waiting for board to be (R)eady... (or (D)ebug)"));
       break;
     case WAIT_START :
-      ttt_serial.println(F("Waiting for you to go (F)irst, unless you want to go (S)econd"));
       uarm_ctrl.wait_start();
+      ttt_serial.println(F("Waiting for you to go (F)irst, unless you want to go (S)econd"));
       break;
     case PLAYER_TURN :
       uarm_ctrl.wait_player();
@@ -283,7 +284,7 @@ void change_state(byte new_state) {
     case CAMERA :
       ttt_serial.println(F("(D)ecode board, (S)table board, Raw (V)alues"));
       ttt_serial.println(F("(R)aise, (L)ower, (O)ut, (I)n, (C)alibrate or (Q)uit"));
-      uarm_ctrl.move_to(0, wait_y, wait_z, 90, 1);
+      uarm_ctrl.debug_move_to(0, wait_y, wait_z, 90, 1);
       show_wait();
       break;
   }
@@ -318,4 +319,5 @@ char get_mark(byte val) {
       break;
   }
 }
+
 

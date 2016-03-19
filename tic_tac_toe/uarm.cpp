@@ -56,14 +56,17 @@ void uArm_Controller::wait_ready() {
   // it is now time to think about playing a game
   // do whatever to show this, then get into position for the sensor to check board state
   move_wait_position();
+  debug_detach();
 }
 
 void uArm_Controller::wait_start() {
   move_wait_position();
+  debug_detach();
 }
 
 void uArm_Controller::wait_player() {
   move_wait_position();
+  debug_detach();
 }
 
 void uArm_Controller::new_game(bool play_first) {
@@ -84,6 +87,7 @@ void uArm_Controller::make_move(byte posn) {
   ttt_serial.print(F(", Z: "));
   ttt_serial.println(BOARD_HGT);
   move_marker(my_mark == 1 ? X_MARKER_X : O_MARKER_X, my_mark == 1 ? X_MARKER_Y : O_MARKER_Y, MARKER_HGT, board_positions[posn][0], board_positions[posn][1], BOARD_HGT);
+  debug_detach();
 }
 
 // debug function
@@ -116,6 +120,7 @@ void uArm_Controller::show_board_position(byte posn) {
   ttt_serial.print(F(", Z: "));
   ttt_serial.println(z);
   move_to(x, y, z, hand_offset(0), 1);
+  debug_detach();
 }
 
 void uArm_Controller::show_xyz() {
@@ -145,7 +150,6 @@ void uArm_Controller::show_xyz() {
 
 void uArm_Controller::move_wait_position() {
   move_to(WAIT_X, WAIT_Y, WAIT_Z, hand_offset(0), 1.5);
-
 }
 
 // this is the main move procedure to pickup a playing piece at one location and drop it at another
@@ -167,6 +171,7 @@ void uArm_Controller::move_marker(double init_x, double init_y, double init_z, d
   move_to(dest_x, dest_y, dest_z, end_rot, 1);              // move to the destination position
     // uarm.moveToOpts(dest_x, dest_y, dest_z, 0, F_HAND_ROT_REL, 1, PATH_ANGLES, INTERP_EASE_INOUT);
   pickup_drop(false, dest_x, dest_y, dest_z, end_rot);  // move end-effector downwards until stopper hits something, then drop it
+  debug_detach();
 }
 
 void uArm_Controller::pickup_drop(bool pickup, double current_x, double current_y, double current_z, int tgt_rotation) {
@@ -180,7 +185,7 @@ void uArm_Controller::pickup_drop(bool pickup, double current_x, double current_
           // uarm.moveToOpts(current_x, current_y, current_z, 0, F_HAND_RELATIVE, 0, PATH_ANGLES, INTERP_EASE_INOUT);
         delay(100);
       } else {
-        ttt_serial.println(F("stopper hit!"));
+        //ttt_serial.println(F("stopper hit!"));
       }
     }
   } else {  // dropping
@@ -213,16 +218,8 @@ void uArm_Controller::postgame(byte winner) {
   // if loser, shake "head" back and forth as shrink back to 0,0,0
 }
 
-
-
-void uArm_Controller::show_angles(double theta_1, double theta_2, double theta_3, double hand_angle) {
-  ttt_serial.print(F("Rot: "));
-  ttt_serial.println(theta_1);
-  ttt_serial.print(F("Left: "));
-  ttt_serial.println(theta_2);
-  ttt_serial.print(F("Right: "));
-  ttt_serial.println(theta_3);
-  ttt_serial.print(F("Hand: "));
-  ttt_serial.println(hand_angle);
+void uArm_Controller::debug_detach() {
+  uarm.detachAll();
+  ttt_serial.println(F("Servos detached!"));
 }
 

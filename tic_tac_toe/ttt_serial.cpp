@@ -1,4 +1,4 @@
-#include "ttt_serial.h"
+                                                                                                                                                                                                                                                    #include "ttt_serial.h"
 
 #ifndef OUTPUT_UART
 #include <SoftwareSerial.h>
@@ -27,7 +27,14 @@ byte TTT_Serial::read() { return Serial.read(); }
 
 #else
 
-void TTT_Serial::begin() { proxySerial.begin(SOFTW_BAUD); } // start software serial port at desired bps
+void TTT_Serial::begin() { 
+  //digitalWrite(TX_PIN, HIGH);
+  //pinMode(TX_PIN, OUTPUT);
+  //pinMode(RX_PIN, INPUT);
+  //digitalWrite(RX_PIN, HIGH);  // pullup for normal logic!
+  proxySerial.begin(SOFTW_BAUD);
+} // start software serial port at desired bps
+
 void TTT_Serial::print(char *val) { proxySerial.print(val); }
 void TTT_Serial::print(int val) { proxySerial.print(val); }
 void TTT_Serial::print(float val) { proxySerial.print(val); }
